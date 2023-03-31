@@ -18,20 +18,13 @@ class PreviouslyPairedDeviceListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_previously_paired_device_list)
 
-        val mDeviceList = ArrayList<String>()
-        val pairedDevices: Set<BluetoothDevice>?
-        val bluetoothManager: BluetoothManager = getSystemService(BluetoothManager::class.java)
-        val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
-        if (bluetoothAdapter == null) {
-            Log.e("Bluetooth:", "Not supported on device")
-        }
-        
-        //mDeviceList.add("device.name" + "\n" + "device.address")
+        val previouslyPairedDevices = ArrayList<String>()
+        val bluetoothAdapter: BluetoothAdapter? = getSystemService(BluetoothManager::class.java).adapter
+
+        //previouslyPairedDevices.add("device.name" + "\n" + "device.address") //For testing adapter in emu
         try {
-            pairedDevices = bluetoothAdapter?.bondedDevices
-            Log.i("Bluetooth:", pairedDevices.toString())
-            pairedDevices?.forEach { device ->
-                mDeviceList.add(device.name + "\n" + device.address)
+            bluetoothAdapter?.bondedDevices?.forEach { device ->
+                previouslyPairedDevices.add(device.name + "\n" + device.address)
             }
         } catch (e: SecurityException) {
             Log.e("Bluetooth:", e.toString())
@@ -39,16 +32,14 @@ class PreviouslyPairedDeviceListActivity : AppCompatActivity() {
 
         val pairedDeviceList = findViewById<ListView>(R.id.paired_device_list)
         pairedDeviceList.adapter = ArrayAdapter(
-            this,
-            android.R.layout.simple_list_item_1,
-            android.R.id.text1,
-            mDeviceList
+            this, android.R.layout.simple_list_item_1, android.R.id.text1, previouslyPairedDevices
         )
 
         val pairNewDeviceButton = findViewById<Button>(R.id.pair_new_button)
         pairNewDeviceButton.setOnClickListener {
             val intent = Intent(this, PairNewDeviceActivity::class.java)
             startActivity(intent)
+
         }
     }
 }
