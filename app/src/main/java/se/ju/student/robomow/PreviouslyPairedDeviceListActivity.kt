@@ -1,5 +1,6 @@
 package se.ju.student.robomow
 
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
@@ -11,6 +12,7 @@ import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ListView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 
 class PreviouslyPairedDeviceListActivity : AppCompatActivity() {
@@ -39,6 +41,19 @@ class PreviouslyPairedDeviceListActivity : AppCompatActivity() {
         pairNewDeviceButton.setOnClickListener {
             val intent = Intent(this, PairNewDeviceActivity::class.java)
             startActivity(intent)
+        }
+
+        //Clicking on a device
+        pairedDeviceList.setOnItemClickListener { _, _, position, _ ->
+            @SuppressLint("MissingPermission")
+            val device = bluetoothAdapter?.bondedDevices?.elementAt(position)
+            if (device != null) {
+                val intent = Intent(this, JoystickActivity::class.java)
+                intent.putExtra("device", device)
+                startActivity(intent)
+            } else {
+                Toast.makeText(this, "Failed to connect to the device", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }

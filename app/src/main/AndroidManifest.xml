@@ -36,6 +36,9 @@
             android:name=".PairNewDeviceActivity"
             android:exported="false" />
         <activity
+            android:name=".JoystickActivity"
+            android:exported="false" />
+        <activity
             android:name=".PreviouslyPairedDeviceListActivity"
             android:exported="false" />
         <activity
