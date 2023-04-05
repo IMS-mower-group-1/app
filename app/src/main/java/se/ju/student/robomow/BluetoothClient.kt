@@ -10,6 +10,7 @@ import java.io.OutputStream
 import java.util.*
 
 class BluetoothClient(private val device: BluetoothDevice) {
+
     private val uuid: UUID = UUID.fromString("30097c35-95b9-4f92-9d2e-e3e06aa3b07f")
     private var socket: BluetoothSocket? = null
     private var inputStream: InputStream? = null
@@ -17,29 +18,48 @@ class BluetoothClient(private val device: BluetoothDevice) {
 
     @SuppressLint("MissingPermission")
     fun connect(): Boolean {
-        socket = device.createRfcommSocketToServiceRecord(uuid)
-        socket?.connect()
-        inputStream = socket?.inputStream
-        outputStream = socket?.outputStream
+        try {
+            socket = device.createRfcommSocketToServiceRecord(uuid)
+            socket?.connect()
+            inputStream = socket?.inputStream
+            outputStream = socket?.outputStream
+        } catch (e: IOException) {
+            Log.e("BluetoothClient", "Error connecting to socket", e)
+            return false
+        }
         return true
     }
 
     fun sendMessage(message: String): Boolean {
         if (outputStream == null) return false
-        outputStream?.write(message.toByteArray())
-        return true
+        return try {
+            outputStream?.write(message.toByteArray())
+            true
+        } catch (e: IOException) {
+            Log.e("BluetoothClient", "Error sending message", e)
+            false
+        }
     }
 
     fun readMessage(): String? {
         if (inputStream == null) return null
         val buffer = ByteArray(1024)
-        val bytes = inputStream?.read(buffer) ?: 0
-        return String(buffer, 0, bytes)
+        return try {
+            val bytes = inputStream?.read(buffer) ?: 0
+            String(buffer, 0, bytes)
+        } catch (e: IOException) {
+            Log.e("BluetoothClient", "Error reading message", e)
+            null
+        }
     }
 
     fun disconnect() {
-        socket?.close()
-        inputStream?.close()
-        outputStream?.close()
+        try {
+            socket?.close()
+            inputStream?.close()
+            outputStream?.close()
+        } catch (e: IOException) {
+            Log.e("BluetoothClient", "Error disconnecting from socket", e)
+        }
     }
 }

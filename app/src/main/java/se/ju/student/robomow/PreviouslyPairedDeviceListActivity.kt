@@ -39,7 +39,6 @@ class PreviouslyPairedDeviceListActivity : AppCompatActivity() {
         pairNewDeviceButton.setOnClickListener {
             val intent = Intent(this, PairNewDeviceActivity::class.java)
             startActivity(intent)
-
         }
     }
 }
