@@ -45,6 +45,7 @@ class DeviceListActivity : AppCompatActivity() {
 
         deviceListViewModel = ViewModelProvider(this).get(DeviceListViewModel::class.java)
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        deviceListViewModel.getPreviouslyPairedDevices(this)
 
         pairedDevicesListView = findViewById(R.id.paired_devices_list_view)
         newDevicesListView = findViewById(R.id.new_devices_list_view)

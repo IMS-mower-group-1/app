@@ -10,54 +10,53 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.util.Log
+import android.os.Build
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat.getSystemService
-import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-
+@SuppressLint("MissingPermission")
 class DeviceListViewModel : ViewModel() {
 
-    private val _previouslyPairedDevices = MutableLiveData<Set<BluetoothDevice>>()
-    private val _newDevices = MutableLiveData<MutableSet<BluetoothDevice>>()
-    private var bluetoothAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+    private val _newDevices = MutableLiveData<Set<BluetoothDevice>>()
+    val newDevices: LiveData<Set<BluetoothDevice>> get() = _newDevices
 
-    val previouslyPairedDevices: MutableLiveData<Set<BluetoothDevice>>
-        get() = _previouslyPairedDevices
-    val newDevices: MutableLiveData<MutableSet<BluetoothDevice>>
-        get() = _newDevices
+    private val _previouslyPairedDevices = MutableLiveData<Set<BluetoothDevice>>()
+    val previouslyPairedDevices: LiveData<Set<BluetoothDevice>> get() = _previouslyPairedDevices
+
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            val action = intent?.action
-            when (action) {
+            when (intent?.action) {
                 BluetoothDevice.ACTION_FOUND -> {
-                    val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-                    if (device != null) {
-                        _newDevices.value?.add(device)
-                        _newDevices.postValue(_newDevices.value)
+                    val device = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        intent.getParcelableExtra(
+                            BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java
+                        )
+                    } else {
+                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
                     }
-                }
-                BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
-                    context?.unregisterReceiver(this)
+                    if (device is BluetoothDevice) {
+                        _newDevices.value = _newDevices.value.orEmpty().plus(device)
+                    }
                 }
             }
         }
     }
 
-    init {
-        @SuppressLint("MissingPermission")
-        _previouslyPairedDevices.value = bluetoothAdapter.bondedDevices
-        _newDevices.value = mutableSetOf()
+    fun getPreviouslyPairedDevices(context: Context) {
+        val bluetoothAdapter = context.getSystemService(BluetoothManager::class.java).adapter
+        try {
+            _previouslyPairedDevices.value = bluetoothAdapter.bondedDevices
+        } catch (e: SecurityException) {
+            // TODO: Handle Exception
+        }
     }
 
-    @SuppressLint("MissingPermission")
     fun startDiscovery(context: Context) {
         val permissions = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION)
         ActivityCompat.requestPermissions(context as Activity, permissions, 0)
-        bluetoothAdapter = context.getSystemService(BluetoothManager::class.java).adapter
+        val bluetoothAdapter = context.getSystemService(BluetoothManager::class.java).adapter
 
         val filter = IntentFilter().apply {
             addAction(BluetoothDevice.ACTION_FOUND)
@@ -67,9 +66,8 @@ class DeviceListViewModel : ViewModel() {
         bluetoothAdapter.startDiscovery()
     }
 
-    @SuppressLint("MissingPermission")
     fun cancelDiscovery(context: Context) {
+        val bluetoothAdapter = context.getSystemService(BluetoothManager::class.java).adapter
         bluetoothAdapter.cancelDiscovery()
-        context.unregisterReceiver(receiver)
     }
 }
