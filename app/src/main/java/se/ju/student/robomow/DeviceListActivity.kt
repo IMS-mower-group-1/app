@@ -26,16 +26,9 @@ import android.os.Looper
 class DeviceListActivity : AppCompatActivity() {
 
     private lateinit var deviceListViewModel: DeviceListViewModel
-    private lateinit var bluetoothAdapter: BluetoothAdapter
-    private lateinit var pairedDevicesListView: ListView
-    private lateinit var newDevicesListView: ListView
-    private lateinit var pairedDevicesArrayAdapter: ArrayAdapter<String>
-    private lateinit var newDevicesArrayAdapter: ArrayAdapter<String>
+    private lateinit var pairedDevicesArrayAdapter: ArrayAdapter<BluetoothDevice>
+    private lateinit var newDevicesArrayAdapter: ArrayAdapter<BluetoothDevice>
     private val mainScope = CoroutineScope(Dispatchers.Main)
-
-    private val pairedDeviceList = mutableListOf<BluetoothDevice>()
-    private val newDeviceList = mutableListOf<BluetoothDevice>()
-
     // Add a progress dialog to show during the pairing process
     private lateinit var progressDialog: ProgressDialog
     @SuppressLint("MissingPermission")
@@ -43,12 +36,15 @@ class DeviceListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_device_list)
 
-        deviceListViewModel = ViewModelProvider(this).get(DeviceListViewModel::class.java)
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        deviceListViewModel = ViewModelProvider(this)[DeviceListViewModel::class.java]
         deviceListViewModel.getPreviouslyPairedDevices(this)
+        registerReceiver(
+            deviceListViewModel.getReceiver(),
+            deviceListViewModel.getIntentFilter()
+        )
 
-        pairedDevicesListView = findViewById(R.id.paired_devices_list_view)
-        newDevicesListView = findViewById(R.id.new_devices_list_view)
+        val pairedDevicesListView = findViewById<ListView>(R.id.paired_devices_list_view)
+        val newDevicesListView = findViewById<ListView>(R.id.new_devices_list_view)
 
         pairedDevicesArrayAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1)
         newDevicesArrayAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1)
@@ -57,21 +53,15 @@ class DeviceListActivity : AppCompatActivity() {
         newDevicesListView.adapter = newDevicesArrayAdapter
 
         deviceListViewModel.previouslyPairedDevices.observe(this) { devices ->
-            devices.forEach { device ->
-                val deviceInfo = "${device.name} - ${device.address}"
-                pairedDevicesArrayAdapter.add(deviceInfo)
-                pairedDeviceList.add(device)
-            }
+            pairedDevicesArrayAdapter.clear()
+            pairedDevicesArrayAdapter.addAll(devices)
+
         }
 
         deviceListViewModel.newDevices.observe(this) { devices ->
-            devices.forEach { device ->
-                if (!newDeviceList.contains(device)) {
-                    val deviceInfo = "${device.name ?: "Unknown"} - ${device.address}"
-                    newDevicesArrayAdapter.add(deviceInfo)
-                    newDeviceList.add(device)
-                }
-            }
+            newDevicesArrayAdapter.clear()
+            newDevicesArrayAdapter.addAll(devices)
+
         }
 
         // Initialize the progress dialog
@@ -81,24 +71,22 @@ class DeviceListActivity : AppCompatActivity() {
             setCanceledOnTouchOutside(false)
         }
 
-        deviceListViewModel.startDiscovery(this)
-
         pairedDevicesListView.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
-            connectToDevice(position, true)
+            val device = pairedDevicesListView.getItemAtPosition(position)
+            if (device is BluetoothDevice){
+                connectToDevice(device)
+            }
         }
 
         newDevicesListView.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
-            connectToDevice(position, false)
+            val device = newDevicesListView.getItemAtPosition(position)
+            if (device is BluetoothDevice){
+                connectToDevice(device)
+            }
         }
     }
     @SuppressLint("MissingPermission")
-    private fun connectToDevice(position: Int, isPaired: Boolean) {
-        val device = if (isPaired) {
-            pairedDeviceList[position]
-        } else {
-            newDeviceList[position]
-        }
-
+    private fun connectToDevice(device: BluetoothDevice) {
         // Show the progress dialog
         progressDialog.show()
 
@@ -179,8 +167,13 @@ class DeviceListActivity : AppCompatActivity() {
         }
     }
 
+    override fun onStart(){
+        super.onStart()
+        deviceListViewModel.getPreviouslyPairedDevices(this)
+        deviceListViewModel.startDiscovery(this)
+    }
     override fun onDestroy() {
         super.onDestroy()
-        deviceListViewModel.cancelDiscovery(this)
+        unregisterReceiver(deviceListViewModel.getReceiver())
     }
 }

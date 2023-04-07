@@ -24,6 +24,9 @@ class DeviceListViewModel : ViewModel() {
     private val _previouslyPairedDevices = MutableLiveData<Set<BluetoothDevice>>()
     val previouslyPairedDevices: LiveData<Set<BluetoothDevice>> get() = _previouslyPairedDevices
 
+    private val filter = IntentFilter(BluetoothDevice.ACTION_FOUND)
+    fun getReceiver(): BroadcastReceiver = receiver
+    fun getIntentFilter(): IntentFilter = filter
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -57,12 +60,6 @@ class DeviceListViewModel : ViewModel() {
         val permissions = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION)
         ActivityCompat.requestPermissions(context as Activity, permissions, 0)
         val bluetoothAdapter = context.getSystemService(BluetoothManager::class.java).adapter
-
-        val filter = IntentFilter().apply {
-            addAction(BluetoothDevice.ACTION_FOUND)
-            addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
-        }
-        context.registerReceiver(receiver, filter)
         bluetoothAdapter.startDiscovery()
     }
 
