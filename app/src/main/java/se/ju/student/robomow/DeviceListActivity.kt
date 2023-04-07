@@ -3,7 +3,11 @@ package se.ju.student.robomow
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
@@ -12,6 +16,12 @@ import android.widget.ListView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import android.app.ProgressDialog
+import android.os.Handler
+import android.os.Looper
 
 class DeviceListActivity : AppCompatActivity() {
 
@@ -21,8 +31,13 @@ class DeviceListActivity : AppCompatActivity() {
     private lateinit var newDevicesListView: ListView
     private lateinit var pairedDevicesArrayAdapter: ArrayAdapter<String>
     private lateinit var newDevicesArrayAdapter: ArrayAdapter<String>
-    private val deviceList = mutableListOf<BluetoothDevice>()
+    private val mainScope = CoroutineScope(Dispatchers.Main)
 
+    private val pairedDeviceList = mutableListOf<BluetoothDevice>()
+    private val newDeviceList = mutableListOf<BluetoothDevice>()
+
+    // Add a progress dialog to show during the pairing process
+    private lateinit var progressDialog: ProgressDialog
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,36 +59,123 @@ class DeviceListActivity : AppCompatActivity() {
             devices.forEach { device ->
                 val deviceInfo = "${device.name} - ${device.address}"
                 pairedDevicesArrayAdapter.add(deviceInfo)
-                deviceList.add(device)
+                pairedDeviceList.add(device)
             }
         }
 
         deviceListViewModel.newDevices.observe(this) { devices ->
             devices.forEach { device ->
-                if (!deviceList.contains(device)) {
+                if (!newDeviceList.contains(device)) {
                     val deviceInfo = "${device.name ?: "Unknown"} - ${device.address}"
                     newDevicesArrayAdapter.add(deviceInfo)
-                    deviceList.add(device)
+                    newDeviceList.add(device)
                 }
             }
+        }
+
+        // Initialize the progress dialog
+        progressDialog = ProgressDialog(this).apply {
+            setMessage("Pairing...")
+            setCancelable(false)
+            setCanceledOnTouchOutside(false)
         }
 
         deviceListViewModel.startDiscovery(this)
 
         pairedDevicesListView.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
-            connectToDevice(position)
+            connectToDevice(position, true)
         }
 
         newDevicesListView.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
-            connectToDevice(position)
+            connectToDevice(position, false)
+        }
+    }
+    @SuppressLint("MissingPermission")
+    private fun connectToDevice(position: Int, isPaired: Boolean) {
+        val device = if (isPaired) {
+            pairedDeviceList[position]
+        } else {
+            newDeviceList[position]
+        }
+
+        // Show the progress dialog
+        progressDialog.show()
+
+        // Register the BroadcastReceiver to listen for the bonding process to complete
+        val intentFilter = IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+        registerReceiver(bondingBroadcastReceiver, intentFilter)
+
+        if (device.bondState != BluetoothDevice.BOND_BONDED) {
+            // Initiate a pairing request if the device is not paired
+            mainScope.launch {
+                createBond(device)
+            }
+        } else {
+            // If the device is already paired, connect to it
+            Handler(Looper.getMainLooper()).postDelayed({
+                progressDialog.dismiss()
+                connectToPairedDevice(device)
+            }, 1000) // Show the ProgressDialog for a while before connecting
         }
     }
 
-    private fun connectToDevice(position: Int) {
-        val device = deviceList[position]
+    private fun connectToPairedDevice(device: BluetoothDevice) {
         val intent = Intent(this, JoystickActivity::class.java)
         intent.putExtra("device", device)
         startActivity(intent)
+    }
+    @SuppressLint("MissingPermission")
+    suspend fun createBond(device: BluetoothDevice) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            device.createBond()
+        } else {
+            val createBondMethod = device.javaClass.getMethod("createBond")
+            createBondMethod.invoke(device)
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private val bondingBroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == BluetoothDevice.ACTION_BOND_STATE_CHANGED) {
+                val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                if (device != null) {
+                    when (device.bondState) {
+                        BluetoothDevice.BOND_BONDED -> {
+                            // Pairing is successful, proceed with the connection
+                            Toast.makeText(
+                                this@DeviceListActivity,
+                                "Successfully paired",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            progressDialog.dismiss()
+                            connectToPairedDevice(device)
+                            context?.unregisterReceiver(this) // Unregister BroadcastReceiver
+                        }
+                        BluetoothDevice.BOND_NONE -> {
+                            // Pairing failed, show an error message
+                            Toast.makeText(
+                                this@DeviceListActivity,
+                                "Failed to pair with the device",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            progressDialog.dismiss()
+                            context?.unregisterReceiver(this) // Unregister BroadcastReceiver
+                        }
+                        BluetoothDevice.BOND_BONDING -> {
+                            // Pairing is in progress
+                        }
+                        else -> {
+                            progressDialog.dismiss()
+                            context?.unregisterReceiver(this) // Unregister BroadcastReceiver
+                        }
+                    }
+                } else {
+                    progressDialog.dismiss()
+                    context?.unregisterReceiver(this) // Unregister BroadcastReceiver
+                }
+            }
+        }
     }
 
     override fun onDestroy() {

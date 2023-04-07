@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -17,7 +19,8 @@ class BluetoothClient(private val device: BluetoothDevice) {
     private var outputStream: OutputStream? = null
 
     @SuppressLint("MissingPermission")
-    fun connect(): Boolean {
+    suspend fun connect(): Boolean = withContext(Dispatchers.IO) {
+        disconnect()
         try {
             socket = device.createRfcommSocketToServiceRecord(uuid)
             socket?.connect()
@@ -25,9 +28,9 @@ class BluetoothClient(private val device: BluetoothDevice) {
             outputStream = socket?.outputStream
         } catch (e: IOException) {
             Log.e("BluetoothClient", "Error connecting to socket", e)
-            return false
+            return@withContext false
         }
-        return true
+        return@withContext true
     }
 
     fun sendMessage(message: String): Boolean {
@@ -41,14 +44,17 @@ class BluetoothClient(private val device: BluetoothDevice) {
         }
     }
 
-    fun readMessage(): String? {
-        if (inputStream == null) return null
+    suspend fun readMessage(): String? = withContext(Dispatchers.IO) {
+        if (inputStream == null) return@withContext null
         val buffer = ByteArray(1024)
-        return try {
+        try {
             val bytes = inputStream?.read(buffer) ?: 0
             String(buffer, 0, bytes)
         } catch (e: IOException) {
             Log.e("BluetoothClient", "Error reading message", e)
+            null
+        } catch (e: Exception) {
+            Log.e("BluetoothClient", "Unexpected error while reading message", e)
             null
         }
     }
