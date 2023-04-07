@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
 
         val connectButton = findViewById<Button>(R.id.connect_button)
         connectButton.setOnClickListener {
-            val intent = Intent(this, PreviouslyPairedDeviceListActivity::class.java)
+            val intent = Intent(this, DeviceListActivity::class.java)
             startActivity(intent)
         }
     }
