@@ -10,10 +10,6 @@ import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.ListView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.CoroutineScope
@@ -22,6 +18,10 @@ import kotlinx.coroutines.launch
 import android.app.ProgressDialog
 import android.os.Handler
 import android.os.Looper
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import android.widget.*
+
 @SuppressLint("MissingPermission")
 class DeviceListActivity : AppCompatActivity() {
 
@@ -46,8 +46,8 @@ class DeviceListActivity : AppCompatActivity() {
         val pairedDevicesListView = findViewById<ListView>(R.id.paired_devices_list_view)
         val newDevicesListView = findViewById<ListView>(R.id.new_devices_list_view)
 
-        pairedDevicesArrayAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1)
-        newDevicesArrayAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1)
+        pairedDevicesArrayAdapter = BluetoothDeviceListAdapter(this)
+        newDevicesArrayAdapter = BluetoothDeviceListAdapter(this)
 
         pairedDevicesListView.adapter = pairedDevicesArrayAdapter
         newDevicesListView.adapter = newDevicesArrayAdapter
