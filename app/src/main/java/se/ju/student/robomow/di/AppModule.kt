@@ -1,4 +1,4 @@
-package se.ju.student.robomow.service
+package se.ju.student.robomow.di
 
 import dagger.Module
 import dagger.Provides
@@ -11,10 +11,10 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object RoboMowApiClient{
+object AppModule{
     @Provides
     @Singleton
-    fun getClient(): RoboMowApi {
+    fun provideRoboMowApi(): RoboMowApi {
         return Retrofit.Builder()
             .baseUrl(RoboMowApi.BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
