@@ -9,19 +9,23 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import androidx.activity.result.contract.ActivityResultContracts
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import se.ju.student.robomow.api.RoboMowApi
 import se.ju.student.robomow.model.QuoteList
-import se.ju.student.robomow.service.RoboMowApiService
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+    @Inject
+    lateinit var roboMowApi: RoboMowApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         //Example code to test async API call
-        val roboMowApi = RoboMowApiService()
         GlobalScope.launch(Dispatchers.IO) {
             val response = roboMowApi.getMowSessions()
             if (response.isSuccessful){
