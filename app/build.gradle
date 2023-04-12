@@ -17,6 +17,8 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField "String", "ROBO_MOW_API_URL", "${project.property('ROBO_MOW_API_URL')}"
+        buildConfigField "String", "ROBO_MOW_API_KEY", "${project.property('ROBO_MOW_API_KEY')}"
     }
 
     buildTypes {
