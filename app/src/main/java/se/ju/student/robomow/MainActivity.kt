@@ -27,16 +27,15 @@ class MainActivity : AppCompatActivity() {
 
         //Example code to test async API call
         GlobalScope.launch(Dispatchers.IO) {
-            val response = roboMowApi.getMowSessions()
+            val response = roboMowApi.getPosition("aBPovOQznCxzNHE0Uo97")
             if (response.isSuccessful){
                 Log.d("Response body:", response.body().toString())
-                val body: QuoteList? = response.body()
-                if (body is QuoteList){
-                    val results: List<se.ju.student.robomow.model.Result> = body.results
-                    results.forEach { result ->
-                        Log.d("Q", result.content)
-                    }
+                val body: String? = response.body()
+                if (body is String){
+                    Log.d("API request:", body)
                 }
+            } else {
+                Log.e("API Request:", response.errorBody().toString())
             }
 
         }
