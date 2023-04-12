@@ -14,7 +14,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import se.ju.student.robomow.api.RoboMowApi
-import se.ju.student.robomow.model.QuoteList
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -37,7 +36,6 @@ class MainActivity : AppCompatActivity() {
             } else {
                 Log.e("API Request:", response.errorBody().toString())
             }
-
         }
 
         val bluetoothManager: BluetoothManager = getSystemService(BluetoothManager::class.java)
