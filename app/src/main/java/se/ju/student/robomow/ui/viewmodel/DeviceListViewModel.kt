@@ -1,4 +1,4 @@
-package se.ju.student.robomow
+package se.ju.student.robomow.ui.viewmodel
 
 import android.bluetooth.BluetoothDevice
 import androidx.lifecycle.LiveData

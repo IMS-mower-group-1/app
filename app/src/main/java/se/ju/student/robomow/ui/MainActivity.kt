@@ -1,4 +1,4 @@
-package se.ju.student.robomow
+package se.ju.student.robomow.ui
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
@@ -13,6 +13,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import se.ju.student.robomow.R
 import se.ju.student.robomow.api.RoboMowApi
 import javax.inject.Inject
 

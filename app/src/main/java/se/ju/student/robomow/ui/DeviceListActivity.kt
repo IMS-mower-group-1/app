@@ -1,7 +1,6 @@
-package se.ju.student.robomow
+package se.ju.student.robomow.ui
 
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -9,7 +8,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.CoroutineScope
@@ -18,18 +16,17 @@ import kotlinx.coroutines.launch
 import android.app.ProgressDialog
 import android.os.Handler
 import android.os.Looper
-import android.view.LayoutInflater
-import android.view.ViewGroup
 import android.widget.*
 import dagger.hilt.android.AndroidEntryPoint
+import se.ju.student.robomow.BluetoothDeviceListAdapter
+import se.ju.student.robomow.R
+import se.ju.student.robomow.ui.viewmodel.DeviceListViewModel
 
 @SuppressLint("MissingPermission")
 @AndroidEntryPoint
 class DeviceListActivity : AppCompatActivity() {
 
     private lateinit var deviceListViewModel: DeviceListViewModel
-    private lateinit var pairedDevicesArrayAdapter: ArrayAdapter<BluetoothDevice>
-    private lateinit var newDevicesArrayAdapter: ArrayAdapter<BluetoothDevice>
     private val mainScope = CoroutineScope(Dispatchers.Main)
     // Add a progress dialog to show during the pairing process
     private lateinit var progressDialog: ProgressDialog
@@ -42,8 +39,8 @@ class DeviceListActivity : AppCompatActivity() {
         val pairedDevicesListView = findViewById<ListView>(R.id.paired_devices_list_view)
         val newDevicesListView = findViewById<ListView>(R.id.new_devices_list_view)
 
-        pairedDevicesArrayAdapter = BluetoothDeviceListAdapter(this)
-        newDevicesArrayAdapter = BluetoothDeviceListAdapter(this)
+        val pairedDevicesArrayAdapter = BluetoothDeviceListAdapter(this)
+        val newDevicesArrayAdapter = BluetoothDeviceListAdapter(this)
 
         pairedDevicesListView.adapter = pairedDevicesArrayAdapter
         newDevicesListView.adapter = newDevicesArrayAdapter
@@ -108,7 +105,7 @@ class DeviceListActivity : AppCompatActivity() {
         intent.putExtra("device", device)
         startActivity(intent)
     }
-    suspend fun createBond(device: BluetoothDevice) {
+    private suspend fun createBond(device: BluetoothDevice) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             device.createBond()
         } else {
@@ -162,7 +159,6 @@ class DeviceListActivity : AppCompatActivity() {
 
     override fun onStart(){
         super.onStart()
-        //deviceListViewModel.getPreviouslyPairedDevices(this)
         deviceListViewModel.startDiscovery()
     }
     override fun onDestroy() {
