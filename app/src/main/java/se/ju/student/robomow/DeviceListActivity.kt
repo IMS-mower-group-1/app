@@ -21,8 +21,10 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.*
+import dagger.hilt.android.AndroidEntryPoint
 
 @SuppressLint("MissingPermission")
+@AndroidEntryPoint
 class DeviceListActivity : AppCompatActivity() {
 
     private lateinit var deviceListViewModel: DeviceListViewModel
@@ -35,13 +37,7 @@ class DeviceListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_device_list)
-
         deviceListViewModel = ViewModelProvider(this)[DeviceListViewModel::class.java]
-        deviceListViewModel.getPreviouslyPairedDevices(this)
-        registerReceiver(
-            deviceListViewModel.getReceiver(),
-            deviceListViewModel.getIntentFilter()
-        )
 
         val pairedDevicesListView = findViewById<ListView>(R.id.paired_devices_list_view)
         val newDevicesListView = findViewById<ListView>(R.id.new_devices_list_view)
@@ -166,11 +162,11 @@ class DeviceListActivity : AppCompatActivity() {
 
     override fun onStart(){
         super.onStart()
-        deviceListViewModel.getPreviouslyPairedDevices(this)
-        deviceListViewModel.startDiscovery(this)
+        //deviceListViewModel.getPreviouslyPairedDevices(this)
+        deviceListViewModel.startDiscovery()
     }
     override fun onDestroy() {
         super.onDestroy()
-        unregisterReceiver(deviceListViewModel.getReceiver())
+        deviceListViewModel.unregisterReceiver()
     }
 }
