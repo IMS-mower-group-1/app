@@ -15,7 +15,7 @@ class DeviceListViewModel @Inject constructor(
     val newDevices: LiveData<Set<BluetoothDevice>> get() = bluetoothModel.newDevices
     val previouslyPairedDevices: LiveData<Set<BluetoothDevice>> get() = bluetoothModel.previouslyPairedDevices
     fun startDiscovery() {
-            bluetoothModel.startDiscovery()
+        bluetoothModel.startDiscovery()
     }
 
     fun cancelDiscovery() {

@@ -28,6 +28,7 @@ class DeviceListActivity : AppCompatActivity() {
 
     private lateinit var deviceListViewModel: DeviceListViewModel
     private val mainScope = CoroutineScope(Dispatchers.Main)
+
     // Add a progress dialog to show during the pairing process
     private lateinit var progressDialog: ProgressDialog
 
@@ -64,20 +65,23 @@ class DeviceListActivity : AppCompatActivity() {
             setCanceledOnTouchOutside(false)
         }
 
-        pairedDevicesListView.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
-            val device = pairedDevicesListView.getItemAtPosition(position)
-            if (device is BluetoothDevice){
-                connectToDevice(device)
+        pairedDevicesListView.onItemClickListener =
+            AdapterView.OnItemClickListener { _, _, position, _ ->
+                val device = pairedDevicesListView.getItemAtPosition(position)
+                if (device is BluetoothDevice) {
+                    connectToDevice(device)
+                }
             }
-        }
 
-        newDevicesListView.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
-            val device = newDevicesListView.getItemAtPosition(position)
-            if (device is BluetoothDevice){
-                connectToDevice(device)
+        newDevicesListView.onItemClickListener =
+            AdapterView.OnItemClickListener { _, _, position, _ ->
+                val device = newDevicesListView.getItemAtPosition(position)
+                if (device is BluetoothDevice) {
+                    connectToDevice(device)
+                }
             }
-        }
     }
+
     private fun connectToDevice(device: BluetoothDevice) {
         // Show the progress dialog
         progressDialog.show()
@@ -105,6 +109,7 @@ class DeviceListActivity : AppCompatActivity() {
         intent.putExtra("device", device)
         startActivity(intent)
     }
+
     private suspend fun createBond(device: BluetoothDevice) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             device.createBond()
@@ -117,7 +122,8 @@ class DeviceListActivity : AppCompatActivity() {
     private val bondingBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == BluetoothDevice.ACTION_BOND_STATE_CHANGED) {
-                val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                val device: BluetoothDevice? =
+                    intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
                 if (device != null) {
                     when (device.bondState) {
                         BluetoothDevice.BOND_BONDED -> {
@@ -157,10 +163,11 @@ class DeviceListActivity : AppCompatActivity() {
         }
     }
 
-    override fun onStart(){
+    override fun onStart() {
         super.onStart()
         deviceListViewModel.startDiscovery()
     }
+
     override fun onDestroy() {
         super.onDestroy()
         deviceListViewModel.unregisterReceiver()
