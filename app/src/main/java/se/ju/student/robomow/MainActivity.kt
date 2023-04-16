@@ -9,11 +9,34 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import androidx.activity.result.contract.ActivityResultContracts
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import se.ju.student.robomow.api.RoboMowApi
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+    @Inject
+    lateinit var roboMowApi: RoboMowApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        //Example code to test async API call
+        GlobalScope.launch(Dispatchers.IO) {
+            val response = roboMowApi.getPosition("aBPovOQznCxzNHE0Uo97")
+            if (response.isSuccessful){
+                Log.d("Response body:", response.body().toString())
+                val body: String? = response.body()
+                if (body is String){
+                    Log.d("API request:", body)
+                }
+            } else {
+                Log.e("API Request:", response.errorBody().toString())
+            }
+        }
 
         val bluetoothManager: BluetoothManager = getSystemService(BluetoothManager::class.java)
         val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
