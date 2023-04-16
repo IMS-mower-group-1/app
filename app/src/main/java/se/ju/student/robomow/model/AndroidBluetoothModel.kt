@@ -37,8 +37,6 @@ class AndroidBluetoothModel(
     }
 
     override fun startDiscovery() {
-        if (bluetoothAdapter?.isDiscovering!!) {
-        }
         context.registerReceiver(
             deviceFoundReceiver,
             IntentFilter(BluetoothDevice.ACTION_FOUND)
