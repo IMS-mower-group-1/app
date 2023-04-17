@@ -1,4 +1,4 @@
-package se.ju.student.robomow
+package se.ju.student.robomow.ui
 import android.app.ProgressDialog
 import android.bluetooth.BluetoothDevice
 import android.os.Bundle
@@ -7,6 +7,8 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.*
+import se.ju.student.robomow.BluetoothClient
+import se.ju.student.robomow.R
 
 class JoystickActivity : AppCompatActivity() {
 
