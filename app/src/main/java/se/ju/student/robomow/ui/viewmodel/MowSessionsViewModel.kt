@@ -17,4 +17,23 @@ class MowSessionsViewModel @Inject constructor(
 ) : ViewModel() {
     private val _mowSessions = MutableLiveData<List<MowSession>>()
     val mowSessions: LiveData<List<MowSession>> get() = _mowSessions
+
+
+    fun getMowSessions() {
+        GlobalScope.launch(Dispatchers.IO) {
+            val response = roboMowApi.getMowSessions("aBPovOQznCxzNHE0Uo97")
+            if (response.isSuccessful){
+                Log.d("Response body:", response.body().toString())
+                val sessions = response.body()
+                if (response.body() is List<MowSession>){
+                    _mowSessions.postValue(sessions)
+                }
+            } else {
+                Log.e("API Request:", response.errorBody().toString())
+            }
+        }
+    }
+    init {
+        getMowSessions()
+    }
 }
