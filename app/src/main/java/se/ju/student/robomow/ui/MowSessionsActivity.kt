@@ -1,5 +1,6 @@
 package se.ju.student.robomow.ui
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.ListView
@@ -22,6 +23,13 @@ class MowSessionsActivity : AppCompatActivity() {
 
         mowSessionsListView.setOnItemClickListener { parent, view, position, id ->
             println(mowSessionsListView.getItemAtPosition((position)))
+            val mowSession = mowSessionsListView.getItemAtPosition(position)
+            if (mowSession is MowSession) {
+                Intent(this, TestParcelableActivity::class.java).also {intent ->
+                    intent.putExtra("MOW_SESSION", mowSession)
+                    startActivity(intent)
+                }
+            }
         }
 
     }

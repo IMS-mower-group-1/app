@@ -43,6 +43,9 @@
         android:theme="@style/Theme.RoboMow"
         tools:targetApi="31">
         <activity
+            android:name=".ui.TestParcelableActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.MowSessionsActivity"
             android:exported="false" />
         <activity
