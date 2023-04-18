@@ -12,11 +12,13 @@ data class MowSession(
 ) : Parcelable {
     override fun toString() = id
 }
+
 @Parcelize
 data class Position(
     val x: Int,
     val y: Int
 ) : Parcelable
+
 @Parcelize
 data class TimeStamp(
     val seconds: Long,

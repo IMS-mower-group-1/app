@@ -25,7 +25,7 @@ class MowSessionsActivity : AppCompatActivity() {
             println(mowSessionsListView.getItemAtPosition((position)))
             val mowSession = mowSessionsListView.getItemAtPosition(position)
             if (mowSession is MowSession) {
-                Intent(this, TestParcelableActivity::class.java).also {intent ->
+                Intent(this, TestParcelableActivity::class.java).also { intent ->
                     intent.putExtra("MOW_SESSION", mowSession)
                     startActivity(intent)
                 }
@@ -41,6 +41,7 @@ class MowSessionsActivity : AppCompatActivity() {
             mowSessionsAdapter.addAll(mowSessions)
         }
     }
+
     private fun initListView() {
         mowSessionsListView = findViewById(R.id.mow_sessions_list_view)
         mowSessionsAdapter = ArrayAdapter(
