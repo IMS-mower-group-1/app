@@ -15,6 +15,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import se.ju.student.robomow.R
 import se.ju.student.robomow.api.RoboMowApi
+import se.ju.student.robomow.model.MowSession
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -24,20 +25,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        //Example code to test async API call
-        GlobalScope.launch(Dispatchers.IO) {
-            val response = roboMowApi.getPosition("aBPovOQznCxzNHE0Uo97")
-            if (response.isSuccessful){
-                Log.d("Response body:", response.body().toString())
-                val body: String? = response.body()
-                if (body is String){
-                    Log.d("API request:", body)
-                }
-            } else {
-                Log.e("API Request:", response.errorBody().toString())
-            }
-        }
 
         val bluetoothManager: BluetoothManager = getSystemService(BluetoothManager::class.java)
         val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
@@ -50,6 +37,13 @@ class MainActivity : AppCompatActivity() {
         connectButton.setOnClickListener {
             val intent = Intent(this, DeviceListActivity::class.java)
             startActivity(intent)
+        }
+
+        val routesButton = findViewById<Button>(R.id.route_button)
+        routesButton.setOnClickListener {
+            Intent(this, MowSessionsActivity::class.java).also {
+                startActivity(it)
+            }
         }
     }
 
