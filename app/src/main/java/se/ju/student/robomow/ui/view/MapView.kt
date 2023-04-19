@@ -5,54 +5,18 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import se.ju.student.robomow.model.Position
-import java.lang.Float.min
 import se.ju.student.robomow.R
+import se.ju.student.robomow.ui.constants.MapConstants
+import se.ju.student.robomow.ui.view.utils.MapUtils
+
 
 class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
-    // Constants and paint objects used for drawing the map
-    companion object {
-        private const val PATH_COLOR = 0xFF000000.toInt() // Light green
-        private const val BORDER_COLOR = 0xFF09A104.toInt() // Green
-        private const val START_POSITION_COLOR = Color.BLUE
-        private const val START_POSITION_TEXT_COLOR = Color.WHITE
-        private const val TEXT_SIZE = 30f
-        private const val PATH_STROKE_WIDTH = 30f
-        private const val BORDER_STROKE_WIDTH = 20f
-        private const val MAX_SCALE_FACTOR = 50f
-        private const val MARGIN = 20f
-        private const val IMAGE_OPACITY = 220 // Set the opacity between 0 and 255
-        private const val PATH_OPACITY = 150 // Set the opacity between 0 and 255
-        private const val IMAGE_WIDTH_SCALE = 0.1
-        private const val IMAGE_HEIGHT_SCALE = 0.1
-    }
+    private val pathPaint = MapConstants.pathPaint
+    private val borderPaint = MapConstants.borderPaint
+    private val mowerImagePaint = MapConstants.mowerImagePaint
+    private val startPositionPaint = MapConstants.startPositionPaint
+    private val startTextPaint = MapConstants.startTextPaint
 
-    // Paint objects for path, border, and mower image
-    private val pathPaint = Paint().apply {
-        color = PATH_COLOR
-        style = Paint.Style.STROKE
-        strokeWidth = PATH_STROKE_WIDTH
-        alpha = PATH_OPACITY
-    }
-    private val borderPaint = Paint().apply {
-        color = BORDER_COLOR
-        style = Paint.Style.STROKE
-        strokeWidth = BORDER_STROKE_WIDTH
-    }
-    private val mowerImagePaint = Paint().apply {
-        alpha = IMAGE_OPACITY
-    }
-
-    private val startPositionPaint = Paint().apply {
-        color = START_POSITION_COLOR
-    }
-
-    private val startTextPaint = Paint().apply {
-        color = START_POSITION_TEXT_COLOR
-        textSize = TEXT_SIZE
-        textAlign = Paint.Align.CENTER // Center the text within the circle
-    }
-
-    // Path, scaleFactor, positions, and center coordinates
     private val path = Path()
     private var scaleFactor = 50f
     private var positions: List<Position> = emptyList()
@@ -63,8 +27,8 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private val mowerBitmap: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.husq_mower)
     private val scaledMowerBitmap: Bitmap = Bitmap.createScaledBitmap(
         mowerBitmap,
-        (mowerBitmap.width * IMAGE_WIDTH_SCALE).toInt(), // Scale the width down from the original width
-        (mowerBitmap.height * IMAGE_HEIGHT_SCALE).toInt(), // Scale the height down from the original height
+        (mowerBitmap.width * MapConstants.IMAGE_WIDTH_SCALE).toInt(), // Scale the width down from the original width
+        (mowerBitmap.height * MapConstants.IMAGE_HEIGHT_SCALE).toInt(), // Scale the height down from the original height
         true
     )
     private val mowerMatrix = Matrix()
@@ -98,7 +62,7 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 val lastPosition = lastTwoPositions[1]
                 val x = (lastPosition.x * scaleFactor) + centerX
                 val y = (lastPosition.y * scaleFactor) + centerY
-                val rotation = calculateAngle(lastTwoPositions[0], lastTwoPositions[1])
+                val rotation = MapUtils.calculateAngle(lastTwoPositions[0], lastTwoPositions[1])
                 drawMower(canvas, x, y, rotation)
             }
         }
@@ -106,22 +70,8 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         if (positions.isNotEmpty()) {
             val startX = (positions[0].x * scaleFactor) + centerX
             val startY = (positions[0].y * scaleFactor) + centerY
-            drawStartPosition(canvas, startX, startY)
+            MapUtils.drawStartPosition(canvas, startX, startY)
         }
-    }
-
-    private fun drawStartPosition(canvas: Canvas, x: Float, y: Float) {
-        val radius = PATH_STROKE_WIDTH * 2
-        canvas.drawCircle(x, y, radius, startPositionPaint)
-        canvas.drawText("START", x, y + (startTextPaint.textSize / 3), startTextPaint)
-    }
-
-    // Calculate the angle between two positions in degrees
-    private fun calculateAngle(p1: Position, p2: Position): Float {
-        val dx = p2.x - p1.x
-        val dy = p2.y - p1.y
-        val angleInRadians = Math.atan2(dy.toDouble(), dx.toDouble())
-        return Math.toDegrees(angleInRadians).toFloat()
     }
 
     // Draw the mower image at the specified position and rotation
@@ -136,30 +86,6 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         canvas.drawBitmap(scaledMowerBitmap, mowerMatrix, mowerImagePaint)
     }
 
-    // Calculate the optimal scaleFactor and center of the path
-    private fun autoScale(positions: List<Position>): Pair<Float, Float> {
-        val maxWidth = width - 2 * MARGIN
-        val maxHeight = height - 2 * MARGIN
-
-        val minX = positions.minOf { it.x }
-        val minY = positions.minOf { it.y }
-        val maxX = positions.maxOf { it.x }
-        val maxY = positions.maxOf { it.y }
-
-        val pathWidth = maxX - minX
-        val pathHeight = maxY - minY
-
-        val scaleX = maxWidth / pathWidth
-        val scaleY = maxHeight / pathHeight
-
-        scaleFactor = min(min(scaleX, scaleY), MAX_SCALE_FACTOR) // Add a maximum limit to the scaleFactor
-
-        val pathCenterX = (minX + maxX) * scaleFactor / 2
-        val pathCenterY = (minY + maxY) * scaleFactor / 2
-
-        return Pair(pathCenterX, pathCenterY)
-    }
-
     // Set the coordinates for the mower's path and redraw the view
     fun setCoordinates(newPositions: List<Position>?) {
         if (width == 0 || height == 0) {
@@ -170,7 +96,7 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         newPositions?.let {
             positions = it
 
-            val (pathCenterX, pathCenterY) = autoScale(positions) // Calculate the optimal scaleFactor and get the center of the path
+            val (scaleFactor, pathCenterX, pathCenterY) = MapUtils.autoScale(positions, width, height, MapConstants.MARGIN, MapConstants.MAX_SCALE_FACTOR) // Calculate the optimal scaleFactor and get the center of the path
 
             centerX = (width / 2f) - pathCenterX
             centerY = (height / 2f) - pathCenterY
