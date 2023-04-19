@@ -15,6 +15,7 @@ import android.graphics.Matrix
 import se.ju.student.robomow.R
 
 class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
+    // Constants and paint objects used for drawing the map
     companion object {
         private const val PATH_COLOR = 0xFF000000.toInt() // Black
         private const val BORDER_COLOR = 0xFF09A104.toInt() // Green
@@ -27,6 +28,7 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         private const val IMAGE_HEIGHT_SCALE = 0.1
     }
 
+    // Paint objects for path, border, and mower image
     private val pathPaint = Paint().apply {
         color = PATH_COLOR
         style = Paint.Style.STROKE
@@ -41,14 +43,14 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         alpha = IMAGE_OPACITY // Set the opacity between 0 and 255
     }
 
-
+    // Path, scaleFactor, positions, and center coordinates
     private val path = Path()
     private var scaleFactor = 50f
-
     private var positions: List<Position> = emptyList()
     private var centerX: Float = 0f
     private var centerY: Float = 0f
 
+    // Bitmap and matrix for the mower image
     private val mowerBitmap: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.husq_mower)
     private val scaledMowerBitmap: Bitmap = Bitmap.createScaledBitmap(
         mowerBitmap,
@@ -61,7 +63,7 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        // Draw the border
+        // Draw the border around the map
         canvas.drawRect(
             borderPaint.strokeWidth / 2,
             borderPaint.strokeWidth / 2,
@@ -70,12 +72,12 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             borderPaint
         )
 
-        // Draw the path
+        // Draw the path of the mower
         canvas.save()
         canvas.drawPath(path, pathPaint)
         canvas.restore()
 
-        // Draw the mower at the last position
+        // Draw the mower at the last position on the path
         positions.takeLast(2).let { lastTwoPositions ->
             if (lastTwoPositions.size == 2) {
                 val lastPosition = lastTwoPositions[1]
@@ -87,6 +89,7 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
     }
 
+    // Calculate the angle between two positions in degrees
     private fun calculateAngle(p1: Position, p2: Position): Float {
         val dx = p2.x - p1.x
         val dy = p2.y - p1.y
@@ -94,6 +97,7 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return Math.toDegrees(angleInRadians).toFloat()
     }
 
+    // Draw the mower image at the specified position and rotation
     private fun drawMower(canvas: Canvas, x: Float, y: Float, rotation: Float) {
         val halfWidth = scaledMowerBitmap.width / 2f
         val halfHeight = scaledMowerBitmap.height / 2f
@@ -105,6 +109,7 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         canvas.drawBitmap(scaledMowerBitmap, mowerMatrix, mowerImagePaint)
     }
 
+    // Calculate the optimal scaleFactor and center of the path
     private fun autoScale(positions: List<Position>): Pair<Float, Float> {
         val maxWidth = width - 2 * MARGIN
         val maxHeight = height - 2 * MARGIN
@@ -128,6 +133,7 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return Pair(pathCenterX, pathCenterY)
     }
 
+    // Set the coordinates for the mower's path and redraw the view
     fun setCoordinates(newPositions: List<Position>?) {
         if (width == 0 || height == 0) {
             post { setCoordinates(newPositions) } // If the view is not yet laid out, post the action to the message queue
