@@ -13,11 +13,15 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     companion object {
         private const val PATH_COLOR = 0xFF000000.toInt() // Light green
         private const val BORDER_COLOR = 0xFF09A104.toInt() // Green
+        private const val START_POSITION_COLOR = Color.BLUE
+        private const val START_POSITION_TEXT_COLOR = Color.WHITE
+        private const val TEXT_SIZE = 30f
         private const val PATH_STROKE_WIDTH = 30f
         private const val BORDER_STROKE_WIDTH = 20f
         private const val MAX_SCALE_FACTOR = 50f
         private const val MARGIN = 20f
         private const val IMAGE_OPACITY = 220 // Set the opacity between 0 and 255
+        private const val PATH_OPACITY = 150 // Set the opacity between 0 and 255
         private const val IMAGE_WIDTH_SCALE = 0.1
         private const val IMAGE_HEIGHT_SCALE = 0.1
     }
@@ -27,7 +31,7 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         color = PATH_COLOR
         style = Paint.Style.STROKE
         strokeWidth = PATH_STROKE_WIDTH
-        alpha = 150
+        alpha = PATH_OPACITY
     }
     private val borderPaint = Paint().apply {
         color = BORDER_COLOR
@@ -36,6 +40,16 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
     private val mowerImagePaint = Paint().apply {
         alpha = IMAGE_OPACITY
+    }
+
+    private val startPositionPaint = Paint().apply {
+        color = START_POSITION_COLOR
+    }
+
+    private val startTextPaint = Paint().apply {
+        color = START_POSITION_TEXT_COLOR
+        textSize = TEXT_SIZE
+        textAlign = Paint.Align.CENTER // Center the text within the circle
     }
 
     // Path, scaleFactor, positions, and center coordinates
@@ -88,6 +102,18 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 drawMower(canvas, x, y, rotation)
             }
         }
+
+        if (positions.isNotEmpty()) {
+            val startX = (positions[0].x * scaleFactor) + centerX
+            val startY = (positions[0].y * scaleFactor) + centerY
+            drawStartPosition(canvas, startX, startY)
+        }
+    }
+
+    private fun drawStartPosition(canvas: Canvas, x: Float, y: Float) {
+        val radius = PATH_STROKE_WIDTH * 2
+        canvas.drawCircle(x, y, radius, startPositionPaint)
+        canvas.drawText("START", x, y + (startTextPaint.textSize / 3), startTextPaint)
     }
 
     // Calculate the angle between two positions in degrees
