@@ -26,16 +26,18 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        /*
         val bluetoothManager: BluetoothManager = getSystemService(BluetoothManager::class.java)
         val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
         if (bluetoothAdapter == null) {
             Log.e("Bluetooth:", "Not supported on device")
         }
         requestPermission()
+        */
 
         val connectButton = findViewById<Button>(R.id.connect_button)
         connectButton.setOnClickListener {
-            val intent = Intent(this, DeviceListActivity::class.java)
+            val intent = Intent(this, MapActivity::class.java)
             startActivity(intent)
         }
 
