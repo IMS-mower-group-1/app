@@ -94,7 +94,9 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
 
         newPositions?.let {
-            positions = it
+            positions = it.map { // Reverse the y-coordinates of each position
+                Position(it.x, -it.y)
+            }
 
             val (scaleFactor, pathCenterX, pathCenterY) = MapUtils.autoScale(positions, width, height, MapConstants.MARGIN, MapConstants.MAX_SCALE_FACTOR) // Calculate the optimal scaleFactor and get the center of the path
 
