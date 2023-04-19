@@ -2,12 +2,17 @@ package se.ju.student.robomow.ui.view
 
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.util.AttributeSet
 import android.view.View
 import se.ju.student.robomow.model.Position
 import java.lang.Float.min
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import se.ju.student.robomow.R
 
 class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     companion object {
@@ -29,8 +34,26 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         style = Paint.Style.STROKE
         strokeWidth = BORDER_STROKE_WIDTH
     }
+    private val mowerImagePaint = Paint().apply {
+        alpha = 180 // Set the opacity between 0 and 255
+    }
+
+
     private val path = Path()
     private var scaleFactor = 50f
+
+    private var positions: List<Position> = emptyList()
+    private var centerX: Float = 0f
+    private var centerY: Float = 0f
+
+    private val mowerBitmap: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.husq_mower)
+    private val scaledMowerBitmap: Bitmap = Bitmap.createScaledBitmap(
+        mowerBitmap,
+        (mowerBitmap.width * 0.1).toInt(), // Scale the width down to 50% of the original width
+        (mowerBitmap.height * 0.1).toInt(), // Scale the height down to 50% of the original height
+        true
+    )
+    private val mowerMatrix = Matrix()
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
@@ -46,9 +69,37 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         // Draw the path
         canvas.save()
-        canvas.translate(MARGIN, MARGIN) // Apply the margin
         canvas.drawPath(path, pathPaint)
         canvas.restore()
+
+        // Draw the mower at the last position
+        positions.takeLast(2).let { lastTwoPositions ->
+            if (lastTwoPositions.size == 2) {
+                val lastPosition = lastTwoPositions[1]
+                val x = (lastPosition.x * scaleFactor) + centerX
+                val y = (lastPosition.y * scaleFactor) + centerY
+                val rotation = calculateAngle(lastTwoPositions[0], lastTwoPositions[1]) - 90 // Subtract 90 degrees since the head is at the top
+                drawMower(canvas, x, y, rotation)
+            }
+        }
+    }
+
+    private fun calculateAngle(p1: Position, p2: Position): Float {
+        val dx = p2.x - p1.x
+        val dy = p2.y - p1.y
+        val angleInRadians = Math.atan2(dy.toDouble(), dx.toDouble())
+        return Math.toDegrees(angleInRadians).toFloat()
+    }
+
+    private fun drawMower(canvas: Canvas, x: Float, y: Float, rotation: Float) {
+        val halfWidth = scaledMowerBitmap.width / 2f
+        val halfHeight = scaledMowerBitmap.height / 2f
+
+        mowerMatrix.reset()
+        mowerMatrix.postRotate(rotation, halfWidth, halfHeight)
+        mowerMatrix.postTranslate(x - halfWidth, y - halfHeight)
+
+        canvas.drawBitmap(scaledMowerBitmap, mowerMatrix, mowerImagePaint)
     }
 
     private fun autoScale(positions: List<Position>): Pair<Float, Float> {
@@ -75,29 +126,34 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
 
-    fun setCoordinates(positions: List<Position>?) {
+    fun setCoordinates(newPositions: List<Position>?) {
         if (width == 0 || height == 0) {
-            post { setCoordinates(positions) } // If the view is not yet laid out, post the action to the message queue
+            post { setCoordinates(newPositions) } // If the view is not yet laid out, post the action to the message queue
             return
         }
 
-        val (pathCenterX, pathCenterY) = autoScale(positions!!) // Calculate the optimal scaleFactor and get the center of the path
+        newPositions?.let {
+            positions = it
 
-        val centerX = (width / 2f) - pathCenterX
-        val centerY = (height / 2f) - pathCenterY
+            val (pathCenterX, pathCenterY) = autoScale(positions) // Calculate the optimal scaleFactor and get the center of the path
 
-        path.reset()
-        positions?.forEachIndexed { index, coordinate ->
-            val x = (coordinate.x * scaleFactor) + centerX
-            val y = (coordinate.y * scaleFactor) + centerY
+            centerX = (width / 2f) - pathCenterX
+            centerY = (height / 2f) - pathCenterY
 
-            if (index == 0) {
-                path.moveTo(x, y)
-            } else {
-                path.lineTo(x, y)
+            path.reset()
+            positions.forEachIndexed { index, coordinate ->
+                val x = (coordinate.x * scaleFactor) + centerX
+                val y = (coordinate.y * scaleFactor) + centerY
+
+                if (index == 0) {
+                    path.moveTo(x, y)
+                } else {
+                    path.lineTo(x, y)
+                }
             }
         }
         invalidate()
     }
+
 
 }
