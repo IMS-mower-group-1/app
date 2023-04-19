@@ -6,6 +6,7 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.util.AttributeSet
 import android.view.View
+import se.ju.student.robomow.model.Position
 import se.ju.student.robomow.ui.MapActivity
 
 class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
@@ -49,10 +50,10 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         canvas.restore()
     }
 
-    fun setCoordinates(coordinates: List<MapActivity.Coordinate>) {
-        val scalingFactor = 150f // Adjust this value to control the scaling of the distance between points
+    fun setCoordinates(coordinates: List<Position>?) {
+        val scalingFactor = 50f // Adjust this value to control the scaling of the distance between points
         path.reset()
-        coordinates.forEachIndexed { index, coordinate ->
+        coordinates?.forEachIndexed { index, coordinate ->
             val x = coordinate.x * scalingFactor
             val y = coordinate.y * scalingFactor
             if (index == 0) {
