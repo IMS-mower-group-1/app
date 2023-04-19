@@ -1,29 +1,23 @@
 package se.ju.student.robomow.ui.view
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Path
+import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import se.ju.student.robomow.model.Position
 import java.lang.Float.min
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Matrix
 import se.ju.student.robomow.R
 
 class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     // Constants and paint objects used for drawing the map
     companion object {
-        private const val PATH_COLOR = 0xFF000000.toInt() // Black
+        private const val PATH_COLOR = 0xFF000000.toInt() // Light green
         private const val BORDER_COLOR = 0xFF09A104.toInt() // Green
-        private const val PATH_STROKE_WIDTH = 10f
+        private const val PATH_STROKE_WIDTH = 30f
         private const val BORDER_STROKE_WIDTH = 20f
         private const val MAX_SCALE_FACTOR = 50f
         private const val MARGIN = 20f
-        private const val IMAGE_OPACITY = 180
+        private const val IMAGE_OPACITY = 220 // Set the opacity between 0 and 255
         private const val IMAGE_WIDTH_SCALE = 0.1
         private const val IMAGE_HEIGHT_SCALE = 0.1
     }
@@ -33,6 +27,7 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         color = PATH_COLOR
         style = Paint.Style.STROKE
         strokeWidth = PATH_STROKE_WIDTH
+        alpha = 150
     }
     private val borderPaint = Paint().apply {
         color = BORDER_COLOR
@@ -40,7 +35,7 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         strokeWidth = BORDER_STROKE_WIDTH
     }
     private val mowerImagePaint = Paint().apply {
-        alpha = IMAGE_OPACITY // Set the opacity between 0 and 255
+        alpha = IMAGE_OPACITY
     }
 
     // Path, scaleFactor, positions, and center coordinates
@@ -60,8 +55,14 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     )
     private val mowerMatrix = Matrix()
 
+    // Bitmap for the grass texture background
+    private val grassBitmap: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.grass_texture)
+    private var scaledGrassBitmap: Bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
+
+        canvas.drawBitmap(scaledGrassBitmap, 0f, 0f, null)
 
         // Draw the border around the map
         canvas.drawRect(
@@ -159,6 +160,7 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     path.lineTo(x, y)
                 }
             }
+            scaledGrassBitmap = Bitmap.createScaledBitmap(grassBitmap, width, height, true)
         }
         invalidate()
     }
