@@ -1,6 +1,7 @@
 package se.ju.student.robomow.ui
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.bluetooth.BluetoothDevice
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -17,6 +18,7 @@ import android.app.ProgressDialog
 import android.os.Handler
 import android.os.Looper
 import android.widget.*
+import androidx.core.app.ActivityCompat
 import dagger.hilt.android.AndroidEntryPoint
 import se.ju.student.robomow.BluetoothDeviceListAdapter
 import se.ju.student.robomow.R
@@ -36,6 +38,8 @@ class DeviceListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_device_list)
         deviceListViewModel = ViewModelProvider(this)[DeviceListViewModel::class.java]
+        val permissions = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION)
+        ActivityCompat.requestPermissions(this, permissions, 0)
 
         val pairedDevicesListView = findViewById<ListView>(R.id.paired_devices_list_view)
         val newDevicesListView = findViewById<ListView>(R.id.new_devices_list_view)
