@@ -7,53 +7,53 @@ import android.graphics.Path
 import android.util.AttributeSet
 import android.view.View
 import se.ju.student.robomow.model.Position
-import se.ju.student.robomow.ui.MapActivity
 import java.lang.Float.min
 
 class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
-    private val paint = Paint()
+    companion object {
+        private const val PATH_COLOR = 0xFF000000.toInt() // Black
+        private const val BORDER_COLOR = 0xFF09A104.toInt() // Green
+        private const val PATH_STROKE_WIDTH = 10f
+        private const val BORDER_STROKE_WIDTH = 20f
+        private const val MAX_SCALE_FACTOR = 50f
+        private const val MARGIN = 20f
+    }
+
+    private val pathPaint = Paint().apply {
+        color = PATH_COLOR
+        style = Paint.Style.STROKE
+        strokeWidth = PATH_STROKE_WIDTH
+    }
+    private val borderPaint = Paint().apply {
+        color = BORDER_COLOR
+        style = Paint.Style.STROKE
+        strokeWidth = BORDER_STROKE_WIDTH
+    }
     private val path = Path()
     private var scaleFactor = 50f
-
-    private val borderWidth = 10f
-    private val borderColor = 0xFF000000.toInt()
-    private val margin = 20f
-    private var centerStartPosition = true // Set this flag to true to start the path from the center
-
-    init {
-        paint.color = 0xFF000000.toInt()
-        paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 5f
-    }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
         // Draw the border
-        paint.color = borderColor
-        paint.style = Paint.Style.STROKE
-        paint.strokeWidth = borderWidth
         canvas.drawRect(
-            borderWidth / 2,
-            borderWidth / 2,
-            width - borderWidth / 2,
-            height - borderWidth / 2,
-            paint
+            borderPaint.strokeWidth / 2,
+            borderPaint.strokeWidth / 2,
+            width - borderPaint.strokeWidth / 2,
+            height - borderPaint.strokeWidth / 2,
+            borderPaint
         )
 
         // Draw the path
-        paint.color = 0xFF000000.toInt()
-        paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 5f
         canvas.save()
-        canvas.translate(margin, margin) // Apply the margin
-        canvas.drawPath(path, paint)
+        canvas.translate(MARGIN, MARGIN) // Apply the margin
+        canvas.drawPath(path, pathPaint)
         canvas.restore()
     }
 
     private fun autoScale(positions: List<Position>): Pair<Float, Float> {
-        val maxWidth = width - 2 * margin
-        val maxHeight = height - 2 * margin
+        val maxWidth = width - 2 * MARGIN
+        val maxHeight = height - 2 * MARGIN
 
         val minX = positions.minOf { it.x }
         val minY = positions.minOf { it.y }
@@ -66,13 +66,14 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         val scaleX = maxWidth / pathWidth
         val scaleY = maxHeight / pathHeight
 
-        scaleFactor = min(min(scaleX, scaleY), 50f) // Add a maximum limit to the scaleFactor
+        scaleFactor = min(min(scaleX, scaleY), MAX_SCALE_FACTOR) // Add a maximum limit to the scaleFactor
 
         val pathCenterX = (minX + maxX) * scaleFactor / 2
         val pathCenterY = (minY + maxY) * scaleFactor / 2
 
         return Pair(pathCenterX, pathCenterY)
     }
+
 
     fun setCoordinates(positions: List<Position>?) {
         if (width == 0 || height == 0) {
@@ -82,8 +83,8 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
         val (pathCenterX, pathCenterY) = autoScale(positions!!) // Calculate the optimal scaleFactor and get the center of the path
 
-        val centerX = if (centerStartPosition) (width / 2f) - pathCenterX else margin
-        val centerY = if (centerStartPosition) (height / 2f) - pathCenterY else margin
+        val centerX = (width / 2f) - pathCenterX
+        val centerY = (height / 2f) - pathCenterY
 
         path.reset()
         positions?.forEachIndexed { index, coordinate ->
@@ -98,4 +99,5 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
         invalidate()
     }
+
 }

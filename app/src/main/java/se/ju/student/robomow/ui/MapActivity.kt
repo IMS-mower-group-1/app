@@ -20,7 +20,6 @@ class MapActivity : AppCompatActivity() {
         mapView = findViewById(R.id.map_view)
 
         val mowSession = getMowSession()
-
         mapView.setCoordinates(mowSession?.path)
     }
 
@@ -31,23 +30,5 @@ class MapActivity : AppCompatActivity() {
             intent.getParcelableExtra("MOW_SESSION")
         }
         return mowSession
-    }
-
-    data class PathData(
-        @SerializedName("path")
-        val path: List<Coordinate>
-    )
-
-    data class Coordinate(
-        @SerializedName("x")
-        val x: Int,
-
-        @SerializedName("y")
-        val y: Int
-    )
-
-    private fun parseJson(json: String): PathData {
-        val gson = Gson()
-        return gson.fromJson(json, PathData::class.java)
     }
 }
