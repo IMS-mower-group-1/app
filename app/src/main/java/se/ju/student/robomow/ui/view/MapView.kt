@@ -8,16 +8,17 @@ import android.util.AttributeSet
 import android.view.View
 import se.ju.student.robomow.model.Position
 import se.ju.student.robomow.ui.MapActivity
+import java.lang.Float.min
 
 class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private val paint = Paint()
     private val path = Path()
-    private val scaleFactor = 50f // Adjust this value to control the scaling of the distance between points
+    private var scaleFactor = 50f
 
-    // Define border and margin properties
     private val borderWidth = 10f
     private val borderColor = 0xFF000000.toInt()
     private val margin = 20f
+    private var centerStartPosition = true // Set this flag to true to start the path from the center
 
     init {
         paint.color = 0xFF000000.toInt()
@@ -50,12 +51,45 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         canvas.restore()
     }
 
-    fun setCoordinates(coordinates: List<Position>?) {
-        val scalingFactor = 50f // Adjust this value to control the scaling of the distance between points
+    private fun autoScale(positions: List<Position>): Pair<Float, Float> {
+        val maxWidth = width - 2 * margin
+        val maxHeight = height - 2 * margin
+
+        val minX = positions.minOf { it.x }
+        val minY = positions.minOf { it.y }
+        val maxX = positions.maxOf { it.x }
+        val maxY = positions.maxOf { it.y }
+
+        val pathWidth = maxX - minX
+        val pathHeight = maxY - minY
+
+        val scaleX = maxWidth / pathWidth
+        val scaleY = maxHeight / pathHeight
+
+        scaleFactor = min(min(scaleX, scaleY), 50f) // Add a maximum limit to the scaleFactor
+
+        val pathCenterX = (minX + maxX) * scaleFactor / 2
+        val pathCenterY = (minY + maxY) * scaleFactor / 2
+
+        return Pair(pathCenterX, pathCenterY)
+    }
+
+    fun setCoordinates(positions: List<Position>?) {
+        if (width == 0 || height == 0) {
+            post { setCoordinates(positions) } // If the view is not yet laid out, post the action to the message queue
+            return
+        }
+
+        val (pathCenterX, pathCenterY) = autoScale(positions!!) // Calculate the optimal scaleFactor and get the center of the path
+
+        val centerX = if (centerStartPosition) (width / 2f) - pathCenterX else margin
+        val centerY = if (centerStartPosition) (height / 2f) - pathCenterY else margin
+
         path.reset()
-        coordinates?.forEachIndexed { index, coordinate ->
-            val x = coordinate.x * scalingFactor
-            val y = coordinate.y * scalingFactor
+        positions?.forEachIndexed { index, coordinate ->
+            val x = (coordinate.x * scaleFactor) + centerX
+            val y = (coordinate.y * scaleFactor) + centerY
+
             if (index == 0) {
                 path.moveTo(x, y)
             } else {
