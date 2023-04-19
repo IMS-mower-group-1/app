@@ -22,6 +22,9 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         private const val BORDER_STROKE_WIDTH = 20f
         private const val MAX_SCALE_FACTOR = 50f
         private const val MARGIN = 20f
+        private const val IMAGE_OPACITY = 180
+        private const val IMAGE_WIDTH_SCALE = 0.1
+        private const val IMAGE_HEIGHT_SCALE = 0.1
     }
 
     private val pathPaint = Paint().apply {
@@ -35,7 +38,7 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         strokeWidth = BORDER_STROKE_WIDTH
     }
     private val mowerImagePaint = Paint().apply {
-        alpha = 180 // Set the opacity between 0 and 255
+        alpha = IMAGE_OPACITY // Set the opacity between 0 and 255
     }
 
 
@@ -49,8 +52,8 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private val mowerBitmap: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.husq_mower)
     private val scaledMowerBitmap: Bitmap = Bitmap.createScaledBitmap(
         mowerBitmap,
-        (mowerBitmap.width * 0.1).toInt(), // Scale the width down to 50% of the original width
-        (mowerBitmap.height * 0.1).toInt(), // Scale the height down to 50% of the original height
+        (mowerBitmap.width * IMAGE_WIDTH_SCALE).toInt(), // Scale the width down from the original width
+        (mowerBitmap.height * IMAGE_HEIGHT_SCALE).toInt(), // Scale the height down from the original height
         true
     )
     private val mowerMatrix = Matrix()
@@ -78,7 +81,7 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 val lastPosition = lastTwoPositions[1]
                 val x = (lastPosition.x * scaleFactor) + centerX
                 val y = (lastPosition.y * scaleFactor) + centerY
-                val rotation = calculateAngle(lastTwoPositions[0], lastTwoPositions[1]) - 90 // Subtract 90 degrees since the head is at the top
+                val rotation = calculateAngle(lastTwoPositions[0], lastTwoPositions[1])
                 drawMower(canvas, x, y, rotation)
             }
         }
@@ -125,7 +128,6 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return Pair(pathCenterX, pathCenterY)
     }
 
-
     fun setCoordinates(newPositions: List<Position>?) {
         if (width == 0 || height == 0) {
             post { setCoordinates(newPositions) } // If the view is not yet laid out, post the action to the message queue
@@ -154,6 +156,4 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         }
         invalidate()
     }
-
-
 }
