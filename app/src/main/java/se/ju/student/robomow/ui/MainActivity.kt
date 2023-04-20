@@ -10,12 +10,8 @@ import android.util.Log
 import android.widget.Button
 import androidx.activity.result.contract.ActivityResultContracts
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import se.ju.student.robomow.R
 import se.ju.student.robomow.api.RoboMowApi
-import se.ju.student.robomow.model.MowSession
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -38,6 +34,13 @@ class MainActivity : AppCompatActivity() {
         val connectButton = findViewById<Button>(R.id.connect_button)
         connectButton.setOnClickListener {
             Intent(this, DeviceListActivity::class.java).also {
+                startActivity(it)
+            }
+        }
+
+        val controlButton = findViewById<Button>(R.id.control_button)
+        controlButton.setOnClickListener {
+            Intent(this, RecyclerViewActivity::class.java).also {
                 startActivity(it)
             }
         }
