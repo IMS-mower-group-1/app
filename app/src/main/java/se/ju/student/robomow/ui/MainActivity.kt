@@ -37,8 +37,9 @@ class MainActivity : AppCompatActivity() {
 
         val connectButton = findViewById<Button>(R.id.connect_button)
         connectButton.setOnClickListener {
-            val intent = Intent(this, MapActivity::class.java)
-            startActivity(intent)
+            Intent(this, DeviceListActivity::class.java).also {
+                startActivity(it)
+            }
         }
 
         val routesButton = findViewById<Button>(R.id.route_button)
