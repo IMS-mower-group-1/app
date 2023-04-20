@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import se.ju.student.robomow.adapter.MowSessionAdapter
 import se.ju.student.robomow.R
+import se.ju.student.robomow.ui.view.utils.ItemDividerDecoration
 import se.ju.student.robomow.ui.viewmodel.MowSessionsViewModel
 
 @AndroidEntryPoint
@@ -39,5 +40,6 @@ class MowSessionsActivity : AppCompatActivity() {
         }
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = mowSessionsAdapter
+        recyclerView.addItemDecoration(ItemDividerDecoration(5))
     }
 }
