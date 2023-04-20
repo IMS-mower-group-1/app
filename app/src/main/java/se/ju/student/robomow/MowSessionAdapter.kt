@@ -11,7 +11,9 @@ class MowSessionAdapter(
     private var mowSessions: List<MowSession>
 ) : RecyclerView.Adapter<MowSessionAdapter.MowSessionViewHolder>() {
     class MowSessionViewHolder (itemView: View) : RecyclerView.ViewHolder(itemView){
-        val name: TextView = itemView.findViewById(R.id.mow_session_date)
+        val date: TextView = itemView.findViewById(R.id.mow_session_date)
+        val status: TextView = itemView.findViewById(R.id.mow_session_status)
+        val collisions: TextView = itemView.findViewById(R.id.mow_session_collisions)
     }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MowSessionViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.mow_session_item, parent, false)
@@ -19,7 +21,10 @@ class MowSessionAdapter(
     }
 
     override fun onBindViewHolder(holder: MowSessionViewHolder, position: Int) {
-        holder.name.text = mowSessions[position].toString()
+        val mowSession = mowSessions[position]
+        holder.date.text = mowSession.start.seconds.toString()
+        holder.status.text = if (mowSession.end != null) "Complete"  else "Active"
+        holder.collisions.text = mowSession.avoidedCollisions.size.toString()
     }
 
     fun updateData(newData: List<MowSession>) {
