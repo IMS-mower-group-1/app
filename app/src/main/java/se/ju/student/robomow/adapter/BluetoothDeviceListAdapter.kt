@@ -1,4 +1,4 @@
-package se.ju.student.robomow
+package se.ju.student.robomow.adapter
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.TextView
+import se.ju.student.robomow.R
 
 @SuppressLint("MissingPermission")
 class BluetoothDeviceListAdapter(context: Context) :

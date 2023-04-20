@@ -1,7 +1,6 @@
 package se.ju.student.robomow.ui
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.bluetooth.BluetoothDevice
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -20,7 +19,7 @@ import android.os.Looper
 import android.widget.*
 import androidx.core.app.ActivityCompat
 import dagger.hilt.android.AndroidEntryPoint
-import se.ju.student.robomow.BluetoothDeviceListAdapter
+import se.ju.student.robomow.adapter.BluetoothDeviceListAdapter
 import se.ju.student.robomow.R
 import se.ju.student.robomow.ui.viewmodel.DeviceListViewModel
 
