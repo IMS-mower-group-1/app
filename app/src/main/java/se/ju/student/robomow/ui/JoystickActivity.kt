@@ -9,16 +9,25 @@ import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.*
 import se.ju.student.robomow.BluetoothClient
 import se.ju.student.robomow.R
+import se.ju.student.robomow.ui.view.JoystickView
+import java.math.BigDecimal
+import java.math.RoundingMode
+import kotlin.math.round
 
-class JoystickActivity : AppCompatActivity() {
+class JoystickActivity : AppCompatActivity(), JoystickView.JoystickListener {
 
+    private lateinit var joystickView: JoystickView
     private lateinit var bluetoothClient: BluetoothClient
     private lateinit var readMessageJob: Job
     private lateinit var progressDialog: ProgressDialog
     private val mainScope = CoroutineScope(Dispatchers.Main)
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_joystick)
+        joystickView = findViewById(R.id.joystick)
+        joystickView.joystickListener = this
 
         val device: BluetoothDevice? = intent.getParcelableExtra("device")
         bluetoothClient = BluetoothClient(device!!)
@@ -60,6 +69,12 @@ class JoystickActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onJoystickMoved(angle: Double, speed: Float) {
+        val roundedAngle = round(angle * 100) / 100
+        val roundedFloat = round(speed * 100) / 100
+        bluetoothClient.sendMessage("${roundedAngle},${roundedFloat}")
     }
 
     override fun onDestroy() {

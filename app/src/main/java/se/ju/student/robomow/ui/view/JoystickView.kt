@@ -5,6 +5,8 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PointF
+import android.os.Handler
+import android.os.Looper
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -12,16 +14,29 @@ import kotlin.math.atan2
 import kotlin.math.sin
 import kotlin.math.sqrt
 
+
+
 class JoystickView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
+    interface JoystickListener {
+        fun onJoystickMoved(angle: Double, speed: Float)
+    }
+
+    var joystickListener: JoystickListener? = null
+
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         center.x = w / 2f
         center.y = h / 2f
     }
 
+    private val handler = Handler(Looper.getMainLooper())
+    private var lastUpdateTime: Long = 0
+    private val minDelayTime = 200
+
     // Constants for controlling the size and position of the joystick
     private val outerRadius = 200f
     private val innerRadius = 100f
+
     private val center = PointF(width / 2f, height / 2f)
 
     // Variables for tracking the position of the joystick
@@ -79,6 +94,12 @@ class JoystickView(context: Context, attrs: AttributeSet?) : View(context, attrs
                     }
                     angleToRobot = getAngle(center.x, center.y, joystickPosition.x, joystickPosition.y)
 
+                    val currentTime = System.currentTimeMillis()
+                    if (currentTime - lastUpdateTime >= minDelayTime) {
+                        lastUpdateTime = currentTime
+                        joystickListener?.onJoystickMoved(angleToRobot, speedToRobot)
+                    }
+
 
                     invalidate()
                     return true
@@ -108,6 +129,9 @@ class JoystickView(context: Context, attrs: AttributeSet?) : View(context, attrs
 
         // Rotate the angle by PI/2 counter-clockwise
         angle -= Math.PI / 2
+
+        // Reverse the angle
+        angle = Math.PI - angle
 
         // Normalize the angle to the range of -PI to PI
         if (angle > Math.PI) {
