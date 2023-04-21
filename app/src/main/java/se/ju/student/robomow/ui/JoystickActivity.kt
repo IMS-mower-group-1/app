@@ -20,7 +20,6 @@ class JoystickActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_joystick)
 
-        val button = findViewById<Button>(R.id.send_button)
         val device: BluetoothDevice? = intent.getParcelableExtra("device")
         bluetoothClient = BluetoothClient(device!!)
         mainScope.launch {
@@ -40,11 +39,6 @@ class JoystickActivity : AppCompatActivity() {
             setMessage("Connecting...")
             setCancelable(false)
             setCanceledOnTouchOutside(false)
-        }
-
-
-        button.setOnClickListener {
-            bluetoothClient.sendMessage("10")
         }
 
         // (TEMPORARY) Coroutine Polling for received messages from the socket server
