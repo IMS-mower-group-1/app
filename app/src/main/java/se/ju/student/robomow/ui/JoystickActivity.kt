@@ -18,7 +18,6 @@ class JoystickActivity : AppCompatActivity(), JoystickView.JoystickListener {
 
     private lateinit var joystickView: JoystickView
     private lateinit var bluetoothClient: BluetoothClient
-    private lateinit var readMessageJob: Job
     private lateinit var progressDialog: ProgressDialog
     private val mainScope = CoroutineScope(Dispatchers.Main)
 
@@ -42,44 +41,22 @@ class JoystickActivity : AppCompatActivity(), JoystickView.JoystickListener {
                 finish()
             }
         }
-
         // Initialize the progress dialog
         progressDialog = ProgressDialog(this).apply {
             setMessage("Connecting...")
             setCancelable(false)
             setCanceledOnTouchOutside(false)
         }
-
-        // (TEMPORARY) Coroutine Polling for received messages from the socket server
-        readMessageJob = CoroutineScope(Dispatchers.IO).launch {
-            try {
-                while (isActive) {
-                    val message = bluetoothClient.readMessage()
-                    if (message != null) {
-                        runOnUiThread {
-                            Toast.makeText(this@JoystickActivity, message, Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                    delay(500)
-                }
-            } catch (e: Exception) {
-                Log.e("JoystickActivity", "Error in readMessageJob", e)
-                runOnUiThread {
-                    Toast.makeText(this@JoystickActivity, "Error reading message: ${e.message}", Toast.LENGTH_LONG).show()
-                }
-            }
-        }
     }
 
     override fun onJoystickMoved(angle: Double, speed: Float) {
         val roundedAngle = round(angle * 100) / 100
-        val roundedFloat = round(speed * 100) / 100
-        bluetoothClient.sendMessage("${roundedAngle},${roundedFloat}")
+        val roundedSpeed = round(speed * 100) / 100
+        bluetoothClient.sendMessage("${roundedAngle},${roundedSpeed}\n")
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        readMessageJob.cancel()
         mainScope.cancel()
         bluetoothClient.disconnect()
     }

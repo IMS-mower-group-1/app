@@ -29,10 +29,6 @@ class JoystickView(context: Context, attrs: AttributeSet?) : View(context, attrs
         center.y = h / 2f
     }
 
-    private val handler = Handler(Looper.getMainLooper())
-    private var lastUpdateTime: Long = 0
-    private val minDelayTime = 200
-
     // Constants for controlling the size and position of the joystick
     private val outerRadius = 200f
     private val innerRadius = 100f
@@ -94,11 +90,7 @@ class JoystickView(context: Context, attrs: AttributeSet?) : View(context, attrs
                     }
                     angleToRobot = getAngle(center.x, center.y, joystickPosition.x, joystickPosition.y)
 
-                    val currentTime = System.currentTimeMillis()
-                    if (currentTime - lastUpdateTime >= minDelayTime) {
-                        lastUpdateTime = currentTime
-                        joystickListener?.onJoystickMoved(angleToRobot, speedToRobot)
-                    }
+                    joystickListener?.onJoystickMoved(angleToRobot, speedToRobot)
 
 
                     invalidate()
@@ -109,6 +101,8 @@ class JoystickView(context: Context, attrs: AttributeSet?) : View(context, attrs
                 // If the user releases their touch, reset the joystick position
                 joystickPosition = PointF(center.x, center.y)
                 isMoving = false
+
+                joystickListener?.onJoystickMoved(0.0, 0.0f)
                 invalidate()
                 return true
             }
