@@ -32,7 +32,7 @@ class MowSessionsActivity : AppCompatActivity() {
 
     private fun initRecyclerView() {
         recyclerView = findViewById(R.id.recycler_view)
-        mowSessionsAdapter = MowSessionAdapter(listOf()) { mowSession ->
+        mowSessionsAdapter = MowSessionAdapter(this, listOf()) { mowSession ->
             Intent(this, MapActivity::class.java).also { intent ->
                 intent.putExtra("MOW_SESSION", mowSession)
                 startActivity(intent)

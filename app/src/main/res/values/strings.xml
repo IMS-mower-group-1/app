@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">RoboMow</string>
     <string name="connect">Connect</string>
+    <string name="avoided_collisions">Avoided Collisions: %1$s.</string>
+    <string name="mowing_time">Mowing Time: %1$sm.</string>
+    <string name="mowing_status">Status: %1$s.</string>
+    <string name="mowing_status_complete">Status: Complete.</string>
+    <string name="mowing_status_active">Status: Active.</string>
 </resources>

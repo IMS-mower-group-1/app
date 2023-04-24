@@ -18,27 +18,18 @@
         android:textStyle="bold"
         android:text="date"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Status:"
-            android:layout_marginEnd="18dp"/>
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/mow_session_status"/>
-    </LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/mow_session_status"
+        android:text="@string/mowing_status_complete"/>
 
     <TextView
         android:id="@+id/mow_session_mowing_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Mowing Time: " />
+        android:text="@string/mowing_time" />
 
     <TextView
         android:id="@+id/mow_session_collisions"
@@ -46,6 +37,6 @@
         android:layout_height="wrap_content"
         android:textSize="14sp"
         android:textStyle="normal"
-        android:text="8"/>
+        android:text="@string/avoided_collisions"/>
 
 </LinearLayout>
