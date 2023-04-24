@@ -44,7 +44,7 @@ class JoystickActivity : AppCompatActivity() {
 
 
         button.setOnClickListener {
-            bluetoothClient.sendMessage("Button click")
+            bluetoothClient.sendMessage("10")
         }
 
         // (TEMPORARY) Coroutine Polling for received messages from the socket server
