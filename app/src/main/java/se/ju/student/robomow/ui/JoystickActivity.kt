@@ -33,7 +33,9 @@ class JoystickActivity : AppCompatActivity(), JoystickView.JoystickListener {
         } else {
             intent.getParcelableExtra("device")
         }
-        bluetoothClient = BluetoothClient(device!!)
+        if (device is BluetoothDevice) {
+            bluetoothClient = BluetoothClient(device)
+        }
         mainScope.launch {
             progressDialog.show()
             if (bluetoothClient.connect()) {
