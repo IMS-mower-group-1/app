@@ -28,7 +28,11 @@ class JoystickActivity : AppCompatActivity(), JoystickView.JoystickListener {
         joystickView = findViewById(R.id.joystick)
         joystickView.joystickListener = this
 
-        val device: BluetoothDevice? = intent.getParcelableExtra("device")
+        val device = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra("device", BluetoothDevice::class.java)
+        } else {
+            intent.getParcelableExtra("device")
+        }
         bluetoothClient = BluetoothClient(device!!)
         mainScope.launch {
             progressDialog.show()
