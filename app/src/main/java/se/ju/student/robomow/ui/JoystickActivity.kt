@@ -9,20 +9,33 @@ import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.*
 import se.ju.student.robomow.BluetoothClient
 import se.ju.student.robomow.R
+import se.ju.student.robomow.ui.view.JoystickView
+import java.math.BigDecimal
+import java.math.RoundingMode
+import kotlin.math.round
 
-class JoystickActivity : AppCompatActivity() {
+class JoystickActivity : AppCompatActivity(), JoystickView.JoystickListener {
 
+    private lateinit var joystickView: JoystickView
     private lateinit var bluetoothClient: BluetoothClient
-    private lateinit var readMessageJob: Job
     private lateinit var progressDialog: ProgressDialog
     private val mainScope = CoroutineScope(Dispatchers.Main)
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_joystick)
+        joystickView = findViewById(R.id.joystick)
+        joystickView.joystickListener = this
 
-        val button = findViewById<Button>(R.id.send_button)
-        val device: BluetoothDevice? = intent.getParcelableExtra("device")
-        bluetoothClient = BluetoothClient(device!!)
+        val device = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra("device", BluetoothDevice::class.java)
+        } else {
+            intent.getParcelableExtra("device")
+        }
+        if (device is BluetoothDevice) {
+            bluetoothClient = BluetoothClient(device)
+        }
         mainScope.launch {
             progressDialog.show()
             if (bluetoothClient.connect()) {
@@ -34,43 +47,22 @@ class JoystickActivity : AppCompatActivity() {
                 finish()
             }
         }
-
         // Initialize the progress dialog
         progressDialog = ProgressDialog(this).apply {
             setMessage("Connecting...")
             setCancelable(false)
             setCanceledOnTouchOutside(false)
         }
+    }
 
-
-        button.setOnClickListener {
-            bluetoothClient.sendMessage("10")
-        }
-
-        // (TEMPORARY) Coroutine Polling for received messages from the socket server
-        readMessageJob = CoroutineScope(Dispatchers.IO).launch {
-            try {
-                while (isActive) {
-                    val message = bluetoothClient.readMessage()
-                    if (message != null) {
-                        runOnUiThread {
-                            Toast.makeText(this@JoystickActivity, message, Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                    delay(500)
-                }
-            } catch (e: Exception) {
-                Log.e("JoystickActivity", "Error in readMessageJob", e)
-                runOnUiThread {
-                    Toast.makeText(this@JoystickActivity, "Error reading message: ${e.message}", Toast.LENGTH_LONG).show()
-                }
-            }
-        }
+    override fun onJoystickMoved(angle: Double, speed: Float) {
+        val roundedAngle = round(angle * 100) / 100
+        val roundedSpeed = round(speed * 100) / 100
+        bluetoothClient.sendMessage("${roundedAngle},${roundedSpeed}\n")
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        readMessageJob.cancel()
         mainScope.cancel()
         bluetoothClient.disconnect()
     }
