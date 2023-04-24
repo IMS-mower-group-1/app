@@ -1,7 +1,6 @@
 package se.ju.student.robomow.adapter
 
 import android.content.Context
-import android.content.res.Resources
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,10 +8,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import se.ju.student.robomow.R
 import se.ju.student.robomow.model.MowSession
-import se.ju.student.robomow.model.TimeStamp
 import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 class MowSessionAdapter(
@@ -35,27 +33,14 @@ class MowSessionAdapter(
 
     override fun onBindViewHolder(holder: MowSessionViewHolder, position: Int) {
         val mowSession = mowSessions[position]
-        holder.date.text = getDateFromTimeStamp(mowSession.start.seconds)
+        holder.date.text = getDateTimeFromTimeStamp(mowSession.start.seconds)
         holder.status.text = getMowingStatus(mowSession)
         holder.collisions.text = context.getString(
             R.string.avoided_collisions,
-            mowSession.avoidedCollisions.size.toString()
+            mowSession.avoidedCollisions.size
         )
         holder.itemView.setOnClickListener { onItemClicked(mowSession) }
-        if (mowSessionIsComplete(mowSession)) {
-            holder.mowingTime.text = context.getString(
-                R.string.mowing_time,
-                getMowingTimeMinutes(mowSession.start.seconds, mowSession.end!!.seconds)
-            )
-        } else {
-            holder.mowingTime.text = context.getString(
-                R.string.mowing_time,
-                getMowingTimeMinutes(
-                    mowSession.start.seconds,
-                    Instant.now().epochSecond
-                )
-            )
-        }
+        holder.mowingTime.text = getMowingTime(mowSession)
     }
 
     fun updateData(newData: List<MowSession>) {
@@ -74,13 +59,44 @@ class MowSessionAdapter(
         return mowSession.end != null
     }
 
-    private fun getMowingTimeMinutes(startTimeStamp: Long, endTimeStamp: Long): String {
+    private fun convertToHoursMinutes(startTimeStamp: Long, endTimeStamp: Long): Pair<Int, Int> {
         val mowingTime = endTimeStamp - startTimeStamp
-        return mowingTime.div(60).toString()
+        val totalMinutes = mowingTime.div(60)
+        val hours = totalMinutes.div(60)
+        val minutes = totalMinutes % 60
+        return Pair(hours.toInt(), minutes.toInt())
     }
 
-    private fun getDateFromTimeStamp(timeStamp: Long): String {
-        val date = LocalDateTime.ofEpochSecond(timeStamp, 0, ZoneOffset.UTC)
+    private fun getMowingTime(mowSession: MowSession): String {
+        if (mowSessionIsComplete(mowSession)) {
+            val (hours, min) = convertToHoursMinutes(
+                mowSession.start.seconds,
+                mowSession.end!!.seconds
+            )
+            return context.getString(
+                R.string.mowing_time,
+                hours,
+                min
+            )
+        }
+        val (hours, min) = convertToHoursMinutes(
+            mowSession.start.seconds,
+            Instant.now().epochSecond
+        )
+        return context.getString(
+            R.string.mowing_time,
+            hours,
+            min
+        )
+
+    }
+
+    private fun getDateTimeFromTimeStamp(timeStamp: Long): String {
+        val date = LocalDateTime.ofEpochSecond(
+            timeStamp,
+            0,
+            ZoneId.systemDefault().rules.getOffset(Instant.now())
+        )
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
         return date.format(formatter)
     }
