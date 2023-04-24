@@ -10,12 +10,8 @@ import android.util.Log
 import android.widget.Button
 import androidx.activity.result.contract.ActivityResultContracts
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import se.ju.student.robomow.R
 import se.ju.student.robomow.api.RoboMowApi
-import se.ju.student.robomow.model.MowSession
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -41,6 +37,7 @@ class MainActivity : AppCompatActivity() {
                 startActivity(it)
             }
         }
+
 
         val routesButton = findViewById<Button>(R.id.route_button)
         routesButton.setOnClickListener {
