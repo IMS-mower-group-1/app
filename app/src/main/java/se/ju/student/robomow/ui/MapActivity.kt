@@ -20,7 +20,7 @@ class MapActivity : AppCompatActivity() {
         mapView = findViewById(R.id.map_view)
 
         val mowSession = getMowSession()
-        mapView.setCoordinates(mowSession?.path)
+        mapView.setCoordinates(mowSession?.path, mowSession?.avoidedCollisions)
     }
 
     private fun getMowSession(): MowSession? {

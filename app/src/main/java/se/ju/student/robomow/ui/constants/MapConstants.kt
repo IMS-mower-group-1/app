@@ -40,4 +40,9 @@ object MapConstants {
         textSize = TEXT_SIZE
         textAlign = Paint.Align.CENTER
     }
+    val collisionPaint = Paint().apply {
+        color = Color.RED
+        style = Paint.Style.STROKE
+        strokeWidth = BORDER_STROKE_WIDTH
+    }
 }

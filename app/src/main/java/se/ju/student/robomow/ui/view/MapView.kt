@@ -3,9 +3,12 @@ package se.ju.student.robomow.ui.view
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
+import androidx.core.util.toAndroidXPair
 import se.ju.student.robomow.model.Position
 import se.ju.student.robomow.R
+import se.ju.student.robomow.model.AvoidedCollisions
 import se.ju.student.robomow.ui.constants.MapConstants
 import se.ju.student.robomow.ui.view.utils.MapUtils
 
@@ -16,6 +19,8 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private val mowerImagePaint = MapConstants.mowerImagePaint
     private val startPositionPaint = MapConstants.startPositionPaint
     private val startTextPaint = MapConstants.startTextPaint
+    private val collisionPaint = MapConstants.collisionPaint
+    private val avoidedCollisions = mutableListOf<Pair<RectF,AvoidedCollisions>>()
 
     private val path = Path()
     private var scaleFactor = 50f
@@ -55,7 +60,9 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         canvas.save()
         canvas.drawPath(path, pathPaint)
         canvas.restore()
-
+        avoidedCollisions.forEach {
+            canvas.drawRect(it.first, collisionPaint)
+        }
         // Draw the mower at the last position on the path
         positions.takeLast(2).let { lastTwoPositions ->
             if (lastTwoPositions.size == 2) {
@@ -87,9 +94,9 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     // Set the coordinates for the mower's path and redraw the view
-    fun setCoordinates(newPositions: List<Position>?) {
+    fun setCoordinates(newPositions: List<Position>?, avoidedCol: List<AvoidedCollisions>?) {
         if (width == 0 || height == 0) {
-            post { setCoordinates(newPositions) } // If the view is not yet laid out, post the action to the message queue
+            post { setCoordinates(newPositions, avoidedCol) } // If the view is not yet laid out, post the action to the message queue
             return
         }
 
@@ -111,11 +118,30 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 if (index == 0) {
                     path.moveTo(x, y)
                 } else {
+                    //if the current coordinate matches a collisionAvoidance, add it to the list
+                    //This way a rect is bound to a avoidedCollision and the image can be fetched.
+                    if (coordinate.x == 4){
+                        avoidedCollisions.add(Pair(RectF(x,y,x+10,y+10), avoidedCol!![0]))
+                    }
                     path.lineTo(x, y)
                 }
             }
             scaledGrassBitmap = Bitmap.createScaledBitmap(grassBitmap, width, height, true)
         }
         invalidate()
+    }
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                val x = event.x
+                val y = event.y
+                avoidedCollisions.forEach {
+                    if (x >= it.first.left && x <= it.first.right && y >= it.first.top && y <= it.first.bottom) {
+                        println("pressed ${it.second}")
+                    }
+                }
+            }
+        }
+        return true
     }
 }
