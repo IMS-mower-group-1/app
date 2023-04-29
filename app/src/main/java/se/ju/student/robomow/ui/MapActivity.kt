@@ -10,9 +10,6 @@ import se.ju.student.robomow.model.MowSession
 
 class MapActivity : AppCompatActivity(), MapView.CollisionAvoidanceListener {
     private lateinit var mapView: MapView
-    override fun collisionAvoidancePressed(collision: AvoidedCollisions) {
-        
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,5 +28,16 @@ class MapActivity : AppCompatActivity(), MapView.CollisionAvoidanceListener {
             intent.getParcelableExtra("MOW_SESSION")
         }
         return mowSession
+    }
+
+    override fun collisionAvoidancePressed(collision: AvoidedCollisions) {
+        val imageUrl =
+            "https://firebasestorage.googleapis.com/v0/b/tign13-backend.appspot.com/o/aBPovOQznCxzNHE0Uo97%2F2023-04-20_14%3A15%3A18.jpg?alt=media&token=f296fb1b-68f1-45aa-836f-84c78ec095cf"
+        val imageFragment = CollisionAvoidanceImageFragment().apply {
+            arguments = Bundle().apply {
+                putString(CollisionAvoidanceImageFragment.ARG_IMAGE_URL, imageUrl)
+            }
+        }
+        imageFragment.show(supportFragmentManager, "image_dialog")
     }
 }
