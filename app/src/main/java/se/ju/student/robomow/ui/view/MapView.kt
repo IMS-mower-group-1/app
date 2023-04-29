@@ -5,7 +5,6 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import androidx.core.util.toAndroidXPair
 import se.ju.student.robomow.model.Position
 import se.ju.student.robomow.R
 import se.ju.student.robomow.model.AvoidedCollisions
@@ -21,6 +20,7 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private val startTextPaint = MapConstants.startTextPaint
     private val collisionPaint = MapConstants.collisionPaint
     private val avoidedCollisions = mutableListOf<Pair<RectF,AvoidedCollisions>>()
+    var listener: CollisionAvoidanceListener? = null
 
     private val path = Path()
     private var scaleFactor = 50f
@@ -41,7 +41,9 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     // Bitmap for the grass texture background
     private val grassBitmap: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.grass_texture)
     private var scaledGrassBitmap: Bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
-
+    interface CollisionAvoidanceListener {
+        fun collisionAvoidancePressed(collision: AvoidedCollisions)
+    }
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
@@ -121,7 +123,7 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     //if the current coordinate matches a collisionAvoidance, add it to the list
                     //This way a rect is bound to a avoidedCollision and the image can be fetched.
                     if (coordinate.x == 4){
-                        avoidedCollisions.add(Pair(RectF(x,y,x+10,y+10), avoidedCol!![0]))
+                        avoidedCollisions.add(Pair(RectF(x,y,x+18,y+18), avoidedCol!![0]))
                     }
                     path.lineTo(x, y)
                 }
@@ -135,9 +137,11 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             MotionEvent.ACTION_DOWN -> {
                 val x = event.x
                 val y = event.y
+                println("test")
                 avoidedCollisions.forEach {
                     if (x >= it.first.left && x <= it.first.right && y >= it.first.top && y <= it.first.bottom) {
-                        println("pressed ${it.second}")
+                        listener?.collisionAvoidancePressed(it.second)
+                        return true
                     }
                 }
             }
