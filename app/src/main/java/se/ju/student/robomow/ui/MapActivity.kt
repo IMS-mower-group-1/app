@@ -3,12 +3,23 @@ package se.ju.student.robomow.ui
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import se.ju.student.robomow.R
+import se.ju.student.robomow.api.RoboMowApi
 import se.ju.student.robomow.ui.view.MapView
 import se.ju.student.robomow.model.AvoidedCollisions
 import se.ju.student.robomow.model.MowSession
+import javax.inject.Inject
+
+@AndroidEntryPoint
 
 class MapActivity : AppCompatActivity(), MapView.CollisionAvoidanceListener {
+    @Inject
+    lateinit var roboMowApi: RoboMowApi
     private lateinit var mapView: MapView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,13 +42,15 @@ class MapActivity : AppCompatActivity(), MapView.CollisionAvoidanceListener {
     }
 
     override fun collisionAvoidancePressed(collision: AvoidedCollisions) {
-        val imageUrl =
-            "https://firebasestorage.googleapis.com/v0/b/tign13-backend.appspot.com/o/aBPovOQznCxzNHE0Uo97%2F2023-04-20_14%3A15%3A18.jpg?alt=media&token=f296fb1b-68f1-45aa-836f-84c78ec095cf"
-        val imageFragment = CollisionAvoidanceImageFragment().apply {
-            arguments = Bundle().apply {
-                putString(CollisionAvoidanceImageFragment.ARG_IMAGE_URL, imageUrl)
+        GlobalScope.launch(Dispatchers.IO) {
+            val response = roboMowApi.getImageUrl(collision.imageLink)
+            val collisionAvoidanceImage = response.body()
+            val imageFragment = CollisionAvoidanceImageFragment().apply {
+                arguments = Bundle().apply {
+                    putString(CollisionAvoidanceImageFragment.ARG_IMAGE_URL, collisionAvoidanceImage?.imageURL)
+                }
             }
+            imageFragment.show(supportFragmentManager, "image_dialog")
         }
-        imageFragment.show(supportFragmentManager, "image_dialog")
     }
 }
