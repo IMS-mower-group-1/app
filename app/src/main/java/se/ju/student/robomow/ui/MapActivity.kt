@@ -13,6 +13,7 @@ import se.ju.student.robomow.R
 import se.ju.student.robomow.api.RoboMowApi
 import se.ju.student.robomow.ui.view.MapView
 import se.ju.student.robomow.model.AvoidedCollisions
+import se.ju.student.robomow.model.CollisionAvoidanceImage
 import se.ju.student.robomow.model.MowSession
 import javax.inject.Inject
 
@@ -43,12 +44,17 @@ class MapActivity : AppCompatActivity(), MapView.CollisionAvoidanceListener {
     }
 
     override fun collisionAvoidancePressed(collision: AvoidedCollisions) {
-        lifecycleScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(Dispatchers.Main) {
             val response = roboMowApi.getImageUrl(collision.imageLink)
-            val collisionAvoidanceImage = response.body()
+            val imageUrl = if (response.isSuccessful) {
+                val collisionAvoidanceImage = response.body()
+                collisionAvoidanceImage!!.imageURL
+            } else {
+                "https://cdn.presslabs.com/wp-content/uploads/2018/03/custom-error-pages-825x510.png"
+            }
             val imageFragment = CollisionAvoidanceImageFragment().apply {
                 arguments = Bundle().apply {
-                    putString(CollisionAvoidanceImageFragment.ARG_IMAGE_URL, collisionAvoidanceImage?.imageURL)
+                    putString(CollisionAvoidanceImageFragment.ARG_IMAGE_URL, imageUrl)
                 }
             }
             imageFragment.show(supportFragmentManager, "image_dialog")
