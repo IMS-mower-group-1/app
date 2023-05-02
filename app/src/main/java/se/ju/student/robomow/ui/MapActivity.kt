@@ -3,6 +3,7 @@ package se.ju.student.robomow.ui
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -42,7 +43,7 @@ class MapActivity : AppCompatActivity(), MapView.CollisionAvoidanceListener {
     }
 
     override fun collisionAvoidancePressed(collision: AvoidedCollisions) {
-        GlobalScope.launch(Dispatchers.IO) {
+        lifecycleScope.launch(Dispatchers.IO) {
             val response = roboMowApi.getImageUrl(collision.imageLink)
             val collisionAvoidanceImage = response.body()
             val imageFragment = CollisionAvoidanceImageFragment().apply {
