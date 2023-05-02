@@ -48,7 +48,7 @@ class MapActivity : AppCompatActivity(), MapView.CollisionAvoidanceListener {
         return mowSession
     }
 
-    override fun collisionAvoidancePressed(collision: AvoidedCollisions) {
+    override fun onCollisionAvoidanceClicked(collision: AvoidedCollisions) {
         lifecycleScope.launch(Dispatchers.Main) {
             progressBar.visibility = View.VISIBLE
             val response = roboMowApi.getImageUrl(collision.imageLink)

@@ -10,7 +10,6 @@ import se.ju.student.robomow.R
 import se.ju.student.robomow.model.AvoidedCollisions
 import se.ju.student.robomow.ui.constants.MapConstants
 import se.ju.student.robomow.ui.view.utils.MapUtils
-import java.lang.Math.abs
 
 
 class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
@@ -20,7 +19,7 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private val startPositionPaint = MapConstants.startPositionPaint
     private val startTextPaint = MapConstants.startTextPaint
     private val collisionPaint = MapConstants.collisionPaint
-    private val avoidedCollisions = mutableListOf<Pair<RectF, AvoidedCollisions>>()
+    private val rectFAndAvoidedCollisions = mutableListOf<Pair<RectF, AvoidedCollisions>>()
     var listener: CollisionAvoidanceListener? = null
 
     private val path = Path()
@@ -45,7 +44,7 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private var scaledGrassBitmap: Bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
 
     interface CollisionAvoidanceListener {
-        fun collisionAvoidancePressed(collision: AvoidedCollisions)
+        fun onCollisionAvoidanceClicked(collision: AvoidedCollisions)
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -66,7 +65,7 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         canvas.save()
         canvas.drawPath(path, pathPaint)
         canvas.restore()
-        avoidedCollisions.forEach {
+        rectFAndAvoidedCollisions.forEach {
             canvas.drawRect(it.first, collisionPaint)
         }
         // Draw the mower at the last position on the path
@@ -100,12 +99,12 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     // Set the coordinates for the mower's path and redraw the view
-    fun setCoordinates(newPositions: List<Position>?, avoidedCol: List<AvoidedCollisions>?) {
+    fun setCoordinates(newPositions: List<Position>?, avoidedCollisions: List<AvoidedCollisions>?) {
         if (width == 0 || height == 0) {
             post {
                 setCoordinates(
                     newPositions,
-                    avoidedCol
+                    avoidedCollisions
                 )
             } // If the view is not yet laid out, post the action to the message queue
             return
@@ -129,23 +128,20 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
             path.reset()
             positions.forEachIndexed { index, coordinate ->
-                val x = (coordinate.x * scaleFactor) + centerX
-                val y = (coordinate.y * scaleFactor) + centerY
+                val canvasX = (coordinate.x * scaleFactor) + centerX
+                val canvasY = (coordinate.y * scaleFactor) + centerY
 
                 if (index == 0) {
-                    path.moveTo(x, y)
+                    path.moveTo(canvasX, canvasY)
                 } else {
-                    //if the current coordinate matches a collisionAvoidance, add it to the list
-                    //This way a rect is bound to a avoidedCollision and the image can be fetched.
-                    val pos = Position(coordinate.x, -coordinate.y)
-                    if (avoidedCol != null) {
-                        for (col in avoidedCol) {
-                            if (col.position == pos){
-                                avoidedCollisions.add(Pair(RectF(x, y, x + 18, y + 18), col))
-                            }
-                        }
-                    }
-                    path.lineTo(x, y)
+                    addRectFCollisionAvoidance(
+                        coordinate.x,
+                        coordinate.y,
+                        avoidedCollisions,
+                        canvasX,
+                        canvasY
+                    )
+                    path.lineTo(canvasX, canvasY)
                 }
             }
             scaledGrassBitmap = Bitmap.createScaledBitmap(grassBitmap, width, height, true)
@@ -159,9 +155,9 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 val x = event.x
                 val y = event.y
                 println("test")
-                avoidedCollisions.forEach {
-                    if (isCollisionAvoidanceEvent(x, y, it.first)) {
-                        listener?.collisionAvoidancePressed(it.second)
+                rectFAndAvoidedCollisions.forEach {
+                    if (isCollisionAvoidanceClicked(x, y, it.first)) {
+                        listener?.onCollisionAvoidanceClicked(it.second)
                         return true
                     }
                 }
@@ -170,7 +166,24 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         return true
     }
 
-    private fun isCollisionAvoidanceEvent(
+    //Adds the position where a collision avoidance occurred on the map and ties it to a collision avoidance object
+    private fun addRectFCollisionAvoidance(
+        x: Float,
+        y: Float,
+        avoidedCollisions: List<AvoidedCollisions>?,
+        canvasX: Float,
+        canvasY: Float
+    ) {
+        avoidedCollisions?.let {
+            val pos = Position(x, -y)
+            val avoidedCollision = avoidedCollisions.find { it.position == pos }
+            avoidedCollision?.let {
+                rectFAndAvoidedCollisions.add(Pair(RectF(canvasX, canvasY, canvasX + 20, canvasY + 20), it))
+            }
+        }
+    }
+
+    private fun isCollisionAvoidanceClicked(
         x: Float,
         y: Float,
         avoidedCollisionRect: RectF
