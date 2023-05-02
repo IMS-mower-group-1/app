@@ -10,6 +10,7 @@ import se.ju.student.robomow.R
 import se.ju.student.robomow.model.AvoidedCollisions
 import se.ju.student.robomow.ui.constants.MapConstants
 import se.ju.student.robomow.ui.view.utils.MapUtils
+import java.lang.Math.abs
 
 
 class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
@@ -136,8 +137,13 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 } else {
                     //if the current coordinate matches a collisionAvoidance, add it to the list
                     //This way a rect is bound to a avoidedCollision and the image can be fetched.
-                    if (coordinate.x == 4) {
-                        avoidedCollisions.add(Pair(RectF(x, y, x + 18, y + 18), avoidedCol!![0]))
+                    val pos = Position(coordinate.x, -coordinate.y)
+                    if (avoidedCol != null) {
+                        for (col in avoidedCol) {
+                            if (col.position == pos){
+                                avoidedCollisions.add(Pair(RectF(x, y, x + 18, y + 18), col))
+                            }
+                        }
                     }
                     path.lineTo(x, y)
                 }
