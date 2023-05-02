@@ -1,8 +1,11 @@
 package se.ju.student.robomow.ui
 
+import android.app.ProgressDialog
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
+import android.widget.ProgressBar
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -23,12 +26,14 @@ class MapActivity : AppCompatActivity(), MapView.CollisionAvoidanceListener {
     @Inject
     lateinit var roboMowApi: RoboMowApi
     private lateinit var mapView: MapView
+    private lateinit var progressBar: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
 
         mapView = findViewById(R.id.map_view)
+        progressBar = findViewById(R.id.progress_bar)
         mapView.listener = this
         val mowSession = getMowSession()
         mapView.setCoordinates(mowSession?.path, mowSession?.avoidedCollisions)
@@ -45,6 +50,7 @@ class MapActivity : AppCompatActivity(), MapView.CollisionAvoidanceListener {
 
     override fun collisionAvoidancePressed(collision: AvoidedCollisions) {
         lifecycleScope.launch(Dispatchers.Main) {
+            progressBar.visibility = View.VISIBLE
             val response = roboMowApi.getImageUrl(collision.imageLink)
             val imageUrl = if (response.isSuccessful) {
                 val collisionAvoidanceImage = response.body()
@@ -57,6 +63,7 @@ class MapActivity : AppCompatActivity(), MapView.CollisionAvoidanceListener {
                     putString(CollisionAvoidanceImageFragment.ARG_IMAGE_URL, imageUrl)
                 }
             }
+            progressBar.visibility = View.GONE
             imageFragment.show(supportFragmentManager, "image_dialog")
         }
     }
