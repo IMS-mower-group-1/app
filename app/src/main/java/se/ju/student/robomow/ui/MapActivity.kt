@@ -1,6 +1,7 @@
 package se.ju.student.robomow.ui
 
 import android.app.Dialog
+import android.content.Context
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -30,7 +31,6 @@ class MapActivity : AppCompatActivity(), MapView.CollisionAvoidanceListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
-
         mapView = findViewById(R.id.map_view)
         progressBar = findViewById(R.id.progress_bar)
         mapView.listener = this
@@ -69,10 +69,19 @@ class MapActivity : AppCompatActivity(), MapView.CollisionAvoidanceListener {
     }
 
     private fun setupMapInformationDialog() {
+        val sharedPref = this.getPreferences(Context.MODE_PRIVATE)
+        val hasShownMapOverview = sharedPref.getBoolean(getString(R.string.has_shown_map_overview_key), false)
+        if (hasShownMapOverview) {
+            return
+        }
         informationDialog = Dialog(this)
         informationDialog.setContentView(R.layout.fragment_map_view_information)
         val dismissButton = informationDialog.findViewById<Button>(R.id.dismiss_button)
         dismissButton.setOnClickListener {
+            with(sharedPref.edit()) {
+                putBoolean(getString(R.string.has_shown_map_overview_key), true)
+                apply()
+            }
             informationDialog.dismiss()
         }
         informationDialog.show()

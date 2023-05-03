@@ -10,4 +10,5 @@
     <string name="collision_avoidance_color_explanation">A collision avoidance event, tapping shows an image.</string>
     <string name="start_color_explanation">The start of the mowing session.</string>
     <string name="map_view_information">Map Overview</string>
+    <string name="has_shown_map_overview_key">se.ju.student.robomow.HAS_SHOWN_MAP_OVERVIEW</string>
 </resources>
