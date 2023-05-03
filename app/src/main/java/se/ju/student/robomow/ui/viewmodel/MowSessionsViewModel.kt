@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -19,9 +20,12 @@ class MowSessionsViewModel @Inject constructor(
     private val _mowSessions = MutableLiveData<List<MowSession>>()
     val mowSessions: LiveData<List<MowSession>> get() = _mowSessions
 
+    private val _isLoading = MutableLiveData<Boolean>()
+    val isLoading: LiveData<Boolean> get() = _isLoading
 
     fun getMowSessions() {
         viewModelScope.launch(Dispatchers.IO) {
+            _isLoading.postValue(true)
             val response = roboMowApi.getMowSessions("aBPovOQznCxzNHE0Uo97")
             if (response.isSuccessful){
                 Log.d("Response body:", response.body().toString())
@@ -32,6 +36,7 @@ class MowSessionsViewModel @Inject constructor(
             } else {
                 Log.e("API Request:", response.errorBody().toString())
             }
+            _isLoading.postValue(false)
         }
     }
     init {
