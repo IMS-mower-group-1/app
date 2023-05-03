@@ -1,6 +1,7 @@
 package se.ju.student.robomow.ui
 import android.app.ProgressDialog
 import android.bluetooth.BluetoothDevice
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -20,7 +21,6 @@ import kotlin.math.round
 class JoystickActivity : AppCompatActivity(), JoystickView.JoystickListener {
 
     private lateinit var joystickView: JoystickView
-    private lateinit var progressDialog: ProgressDialog
     private var bluetoothClient: BluetoothClient? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,6 +34,13 @@ class JoystickActivity : AppCompatActivity(), JoystickView.JoystickListener {
             Toast.makeText(this, "Bluetooth connection lost. Please try again.", Toast.LENGTH_SHORT).show()
             finish()
             return
+        }
+        val toAutoButton = findViewById<Button>(R.id.auto_button)
+        toAutoButton.setOnClickListener {
+            bluetoothClient?.sendMessage("AUTO")
+            Intent(this, MainActivity::class.java).also {
+                startActivity(it)
+            }
         }
     }
 
