@@ -130,6 +130,7 @@ class DeviceListActivity : AppCompatActivity() {
                 finish()
             }
         )
+        // Assign the new bluetoothClient to the singleton
         BluetoothClientHolder.bluetoothClient = bluetoothClient
     }
 

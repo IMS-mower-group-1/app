@@ -11,11 +11,9 @@ import kotlinx.coroutines.launch
 @HiltAndroidApp
 class RoboMowApplication : Application() {
 
-    override fun onCreate() {
-        super.onCreate()
-    }
     val mainScope = CoroutineScope(Dispatchers.Main)
 
+    // Create and return bluetoothClient and try to connect to socket
     fun connectToDevice(
         device: BluetoothDevice,
         onConnected: () -> Unit,
@@ -32,8 +30,4 @@ class RoboMowApplication : Application() {
         return bluetoothClient
     }
 
-    fun disconnectFromDevice(bluetoothClient: BluetoothClient) {
-        mainScope.cancel()
-        bluetoothClient.disconnect()
-    }
 }
