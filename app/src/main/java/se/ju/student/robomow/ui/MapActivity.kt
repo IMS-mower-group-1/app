@@ -57,12 +57,16 @@ class MapActivity : AppCompatActivity(), MapView.CollisionAvoidanceListener {
                 val collisionAvoidanceImage = response.body()
                 val imageFragment = CollisionAvoidanceImageFragment().apply {
                     arguments = Bundle().apply {
-                        putString(CollisionAvoidanceImageFragment.ARG_IMAGE_URL, collisionAvoidanceImage!!.imageURL)
+                        putString(
+                            CollisionAvoidanceImageFragment.ARG_IMAGE_URL,
+                            collisionAvoidanceImage!!.imageURL
+                        )
                     }
                 }
                 imageFragment.show(supportFragmentManager, "image_dialog")
             } else {
-                Toast.makeText(this@MapActivity, "Error retrieving the image.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@MapActivity, "Error retrieving the image.", Toast.LENGTH_SHORT)
+                    .show()
             }
             progressBar.visibility = View.GONE
         }
@@ -70,7 +74,8 @@ class MapActivity : AppCompatActivity(), MapView.CollisionAvoidanceListener {
 
     private fun setupMapInformationDialog() {
         val sharedPref = this.getPreferences(Context.MODE_PRIVATE)
-        val hasShownMapOverview = sharedPref.getBoolean(getString(R.string.has_shown_map_overview_key), false)
+        val hasShownMapOverview =
+            sharedPref.getBoolean(getString(R.string.has_shown_map_overview_key), false)
         if (hasShownMapOverview) {
             return
         }
