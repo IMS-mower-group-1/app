@@ -176,8 +176,9 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         avoidedCollisions?.let {
             val pos = Position(x, -y)
             val avoidedCollision = avoidedCollisions.find { it.position == pos }
+            val rectSize = 20
             avoidedCollision?.let {
-                rectFAndAvoidedCollisions.add(Pair(RectF(canvasX, canvasY, canvasX + 20, canvasY + 20), it))
+                rectFAndAvoidedCollisions.add(Pair(RectF(canvasX, canvasY, canvasX + rectSize, canvasY + rectSize), it))
             }
         }
     }
