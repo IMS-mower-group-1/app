@@ -6,4 +6,8 @@
     <string name="mowing_status">Status: %1$s.</string>
     <string name="mowing_status_complete">Status: Complete.</string>
     <string name="mowing_status_active">Status: Active.</string>
+    <string name="mower_icon_explanation">The mowers current location.</string>
+    <string name="collision_avoidance_color_explanation">A collision avoidance event, tapping shows an image.</string>
+    <string name="start_color_explanation">The start of the mowing session.</string>
+    <string name="map_view_information">Map Overview</string>
 </resources>

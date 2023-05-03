@@ -1,22 +1,20 @@
 package se.ju.student.robomow.ui
 
-import android.app.ProgressDialog
+import android.app.Dialog
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
 import android.widget.ProgressBar
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import se.ju.student.robomow.R
 import se.ju.student.robomow.api.RoboMowApi
 import se.ju.student.robomow.ui.view.MapView
 import se.ju.student.robomow.model.AvoidedCollisions
-import se.ju.student.robomow.model.CollisionAvoidanceImage
 import se.ju.student.robomow.model.MowSession
 import javax.inject.Inject
 
@@ -27,6 +25,7 @@ class MapActivity : AppCompatActivity(), MapView.CollisionAvoidanceListener {
     lateinit var roboMowApi: RoboMowApi
     private lateinit var mapView: MapView
     private lateinit var progressBar: ProgressBar
+    private lateinit var informationDialog: Dialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,6 +34,7 @@ class MapActivity : AppCompatActivity(), MapView.CollisionAvoidanceListener {
         mapView = findViewById(R.id.map_view)
         progressBar = findViewById(R.id.progress_bar)
         mapView.listener = this
+        setupMapInformationDialog()
         val mowSession = getMowSession()
         mapView.setCoordinates(mowSession?.path, mowSession?.avoidedCollisions)
     }
@@ -66,5 +66,15 @@ class MapActivity : AppCompatActivity(), MapView.CollisionAvoidanceListener {
             progressBar.visibility = View.GONE
             imageFragment.show(supportFragmentManager, "image_dialog")
         }
+    }
+
+    private fun setupMapInformationDialog() {
+        informationDialog = Dialog(this)
+        informationDialog.setContentView(R.layout.fragment_map_view_information)
+        val dismissButton = informationDialog.findViewById<Button>(R.id.dismiss_button)
+        dismissButton.setOnClickListener {
+            informationDialog.dismiss()
+        }
+        informationDialog.show()
     }
 }
