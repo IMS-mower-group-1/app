@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
+import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -52,19 +53,18 @@ class MapActivity : AppCompatActivity(), MapView.CollisionAvoidanceListener {
         lifecycleScope.launch(Dispatchers.Main) {
             progressBar.visibility = View.VISIBLE
             val response = roboMowApi.getImageUrl(collision.imageLink)
-            val imageUrl = if (response.isSuccessful) {
+            if (response.isSuccessful) {
                 val collisionAvoidanceImage = response.body()
-                collisionAvoidanceImage!!.imageURL
-            } else {
-                "https://cdn.presslabs.com/wp-content/uploads/2018/03/custom-error-pages-825x510.png"
-            }
-            val imageFragment = CollisionAvoidanceImageFragment().apply {
-                arguments = Bundle().apply {
-                    putString(CollisionAvoidanceImageFragment.ARG_IMAGE_URL, imageUrl)
+                val imageFragment = CollisionAvoidanceImageFragment().apply {
+                    arguments = Bundle().apply {
+                        putString(CollisionAvoidanceImageFragment.ARG_IMAGE_URL, collisionAvoidanceImage!!.imageURL)
+                    }
                 }
+                imageFragment.show(supportFragmentManager, "image_dialog")
+            } else {
+                Toast.makeText(this@MapActivity, "Error retrieving the image.", Toast.LENGTH_SHORT).show()
             }
             progressBar.visibility = View.GONE
-            imageFragment.show(supportFragmentManager, "image_dialog")
         }
     }
 

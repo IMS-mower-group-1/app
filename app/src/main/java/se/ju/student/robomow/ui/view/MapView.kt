@@ -154,7 +154,6 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             MotionEvent.ACTION_DOWN -> {
                 val x = event.x
                 val y = event.y
-                println("test")
                 rectFAndAvoidedCollisions.forEach {
                     if (isCollisionAvoidanceClicked(x, y, it.first)) {
                         listener?.onCollisionAvoidanceClicked(it.second)
