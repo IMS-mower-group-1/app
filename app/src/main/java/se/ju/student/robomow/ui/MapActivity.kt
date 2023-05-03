@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
@@ -81,14 +82,18 @@ class MapActivity : AppCompatActivity(), MapView.CollisionAvoidanceListener {
         }
         informationDialog = Dialog(this)
         informationDialog.setContentView(R.layout.fragment_map_view_information)
+        val doNotShowAgain = informationDialog.findViewById<CheckBox>(R.id.do_not_show_again_checkbox)
         val dismissButton = informationDialog.findViewById<Button>(R.id.dismiss_button)
         dismissButton.setOnClickListener {
-            with(sharedPref.edit()) {
-                putBoolean(getString(R.string.has_shown_map_overview_key), true)
-                apply()
+            if (doNotShowAgain.isChecked) {
+                with(sharedPref.edit()) {
+                    putBoolean(getString(R.string.has_shown_map_overview_key), true)
+                    apply()
+                }
             }
             informationDialog.dismiss()
         }
         informationDialog.show()
+
     }
 }

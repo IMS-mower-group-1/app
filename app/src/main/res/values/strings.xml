@@ -11,4 +11,6 @@
     <string name="start_color_explanation">The start of the mowing session.</string>
     <string name="map_view_information">Map Overview</string>
     <string name="has_shown_map_overview_key">se.ju.student.robomow.HAS_SHOWN_MAP_OVERVIEW</string>
+    <string name="do_not_show_this_again">Don\'t show this again.</string>
+    <string name="close">Close</string>
 </resources>

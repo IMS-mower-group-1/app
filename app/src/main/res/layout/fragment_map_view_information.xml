@@ -40,9 +40,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
+        android:layout_weight="1"
         android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:layout_weight="1">
+        android:orientation="horizontal">
 
         <View
             android:layout_width="30dp"
@@ -62,9 +62,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
+        android:layout_weight="2"
         android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:layout_weight="2">
+        android:orientation="horizontal">
 
         <ImageView
             android:layout_width="60dp"
@@ -80,6 +80,13 @@
 
     </LinearLayout>
 
+    <CheckBox
+        android:id="@+id/do_not_show_again_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/do_not_show_this_again"
+        android:textSize="16sp" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -90,7 +97,7 @@
             android:id="@+id/dismiss_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Close" />
+            android:text="@string/close" />
     </LinearLayout>
 
 </LinearLayout>
