@@ -19,8 +19,11 @@ import android.os.Looper
 import android.widget.*
 import androidx.core.app.ActivityCompat
 import dagger.hilt.android.AndroidEntryPoint
+import se.ju.student.robomow.BluetoothClient
+import se.ju.student.robomow.BluetoothClientHolder
 import se.ju.student.robomow.adapter.BluetoothDeviceListAdapter
 import se.ju.student.robomow.R
+import se.ju.student.robomow.RoboMowApplication
 import se.ju.student.robomow.ui.viewmodel.DeviceListViewModel
 
 @SuppressLint("MissingPermission")
@@ -101,16 +104,33 @@ class DeviceListActivity : AppCompatActivity() {
         } else {
             // If the device is already paired, connect to it
             Handler(Looper.getMainLooper()).postDelayed({
-                progressDialog.dismiss()
                 connectToPairedDevice(device)
             }, 1000) // Show the ProgressDialog for a while before connecting
         }
     }
 
     private fun connectToPairedDevice(device: BluetoothDevice) {
-        val intent = Intent(this, JoystickActivity::class.java)
-        intent.putExtra("device", device)
-        startActivity(intent)
+        connectToSocket(device) {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+    }
+
+    private fun connectToSocket(device: BluetoothDevice, onConnectionSuccess: () -> Unit) {
+        val bluetoothClient = (application as RoboMowApplication).connectToDevice(
+            device,
+            onConnected = {
+                progressDialog.dismiss()
+                Toast.makeText(this@DeviceListActivity, "Connected to the device", Toast.LENGTH_SHORT).show()
+                onConnectionSuccess()
+            },
+            onFailed = {
+                progressDialog.dismiss()
+                Toast.makeText(this@DeviceListActivity, "Failed to connect to the device", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        )
+        BluetoothClientHolder.bluetoothClient = bluetoothClient
     }
 
     private suspend fun createBond(device: BluetoothDevice) {
@@ -136,7 +156,6 @@ class DeviceListActivity : AppCompatActivity() {
                                 "Successfully paired",
                                 Toast.LENGTH_SHORT
                             ).show()
-                            progressDialog.dismiss()
                             connectToPairedDevice(device)
                             context?.unregisterReceiver(this) // Unregister BroadcastReceiver
                         }

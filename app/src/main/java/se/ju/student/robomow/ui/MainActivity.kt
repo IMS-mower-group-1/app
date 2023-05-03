@@ -38,6 +38,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        val controlButton = findViewById<Button>(R.id.control_button)
+        controlButton.setOnClickListener {
+            Intent(this, JoystickActivity::class.java).also {
+                startActivity(it)
+            }
+        }
+
 
         val routesButton = findViewById<Button>(R.id.route_button)
         routesButton.setOnClickListener {
