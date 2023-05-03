@@ -3,9 +3,11 @@ package se.ju.student.robomow.ui.view
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.View
 import se.ju.student.robomow.model.Position
 import se.ju.student.robomow.R
+import se.ju.student.robomow.model.AvoidedCollisions
 import se.ju.student.robomow.ui.constants.MapConstants
 import se.ju.student.robomow.ui.view.utils.MapUtils
 
@@ -16,6 +18,9 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private val mowerImagePaint = MapConstants.mowerImagePaint
     private val startPositionPaint = MapConstants.startPositionPaint
     private val startTextPaint = MapConstants.startTextPaint
+    private val collisionPaint = MapConstants.collisionPaint
+    private val rectFAndAvoidedCollisions = mutableListOf<Pair<RectF, AvoidedCollisions>>()
+    var listener: CollisionAvoidanceListener? = null
 
     private val path = Path()
     private var scaleFactor = 50f
@@ -34,8 +39,13 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private val mowerMatrix = Matrix()
 
     // Bitmap for the grass texture background
-    private val grassBitmap: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.grass_texture)
+    private val grassBitmap: Bitmap =
+        BitmapFactory.decodeResource(resources, R.drawable.grass_texture)
     private var scaledGrassBitmap: Bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+
+    interface CollisionAvoidanceListener {
+        fun onCollisionAvoidanceClicked(collision: AvoidedCollisions)
+    }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
@@ -55,7 +65,9 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         canvas.save()
         canvas.drawPath(path, pathPaint)
         canvas.restore()
-
+        rectFAndAvoidedCollisions.forEach {
+            canvas.drawRect(it.first, collisionPaint)
+        }
         // Draw the mower at the last position on the path
         positions.takeLast(2).let { lastTwoPositions ->
             if (lastTwoPositions.size == 2) {
@@ -87,9 +99,14 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     }
 
     // Set the coordinates for the mower's path and redraw the view
-    fun setCoordinates(newPositions: List<Position>?) {
+    fun setCoordinates(newPositions: List<Position>?, avoidedCollisions: List<AvoidedCollisions>?) {
         if (width == 0 || height == 0) {
-            post { setCoordinates(newPositions) } // If the view is not yet laid out, post the action to the message queue
+            post {
+                setCoordinates(
+                    newPositions,
+                    avoidedCollisions
+                )
+            } // If the view is not yet laid out, post the action to the message queue
             return
         }
 
@@ -98,24 +115,83 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                 Position(it.x, -it.y)
             }
 
-            val (scaleFactor, pathCenterX, pathCenterY) = MapUtils.autoScale(positions, width, height, MapConstants.MARGIN, MapConstants.MAX_SCALE_FACTOR) // Calculate the optimal scaleFactor and get the center of the path
+            val (scaleFactor, pathCenterX, pathCenterY) = MapUtils.autoScale(
+                positions,
+                width,
+                height,
+                MapConstants.MARGIN,
+                MapConstants.MAX_SCALE_FACTOR
+            ) // Calculate the optimal scaleFactor and get the center of the path
 
             centerX = (width / 2f) - pathCenterX
             centerY = (height / 2f) - pathCenterY
 
             path.reset()
             positions.forEachIndexed { index, coordinate ->
-                val x = (coordinate.x * scaleFactor) + centerX
-                val y = (coordinate.y * scaleFactor) + centerY
+                val canvasX = (coordinate.x * scaleFactor) + centerX
+                val canvasY = (coordinate.y * scaleFactor) + centerY
 
                 if (index == 0) {
-                    path.moveTo(x, y)
+                    path.moveTo(canvasX, canvasY)
                 } else {
-                    path.lineTo(x, y)
+                    addRectFCollisionAvoidance(
+                        coordinate.x,
+                        coordinate.y,
+                        avoidedCollisions,
+                        canvasX,
+                        canvasY
+                    )
+                    path.lineTo(canvasX, canvasY)
                 }
             }
             scaledGrassBitmap = Bitmap.createScaledBitmap(grassBitmap, width, height, true)
         }
         invalidate()
+    }
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                val x = event.x
+                val y = event.y
+                rectFAndAvoidedCollisions.forEach {
+                    if (isCollisionAvoidanceClicked(x, y, it.first)) {
+                        listener?.onCollisionAvoidanceClicked(it.second)
+                        return true
+                    }
+                }
+            }
+        }
+        return true
+    }
+
+    //Adds the position where a collision avoidance occurred on the map and ties it to a collision avoidance object
+    private fun addRectFCollisionAvoidance(
+        x: Float,
+        y: Float,
+        avoidedCollisions: List<AvoidedCollisions>?,
+        canvasX: Float,
+        canvasY: Float
+    ) {
+        avoidedCollisions?.let {
+            val pos = Position(x, -y)
+            val avoidedCollision = avoidedCollisions.find { it.position == pos }
+            val rectSize = 20
+            avoidedCollision?.let {
+                rectFAndAvoidedCollisions.add(Pair(RectF(canvasX, canvasY, canvasX + rectSize, canvasY + rectSize), it))
+            }
+        }
+    }
+
+    private fun isCollisionAvoidanceClicked(
+        x: Float,
+        y: Float,
+        avoidedCollisionRect: RectF
+    ): Boolean {
+        val rectPadding = 20
+        if (x >= avoidedCollisionRect.left - rectPadding && x <= avoidedCollisionRect.right + rectPadding && y >= avoidedCollisionRect.top - rectPadding && y <= avoidedCollisionRect.bottom + rectPadding) {
+            return true
+        }
+        return false
     }
 }
