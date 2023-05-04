@@ -16,8 +16,8 @@ data class MowSession(
 
 @Parcelize
 data class Position(
-    val x: Int,
-    val y: Int
+    val x: Float,
+    val y: Float
 ) : Parcelable
 
 @Parcelize
