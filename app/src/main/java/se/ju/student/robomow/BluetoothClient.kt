@@ -33,6 +33,10 @@ class BluetoothClient(private val device: BluetoothDevice) {
         return@withContext true
     }
 
+    fun isConnected(): Boolean {
+        return socket?.isConnected ?: false
+    }
+
     fun sendMessage(message: String): Boolean {
         if (outputStream == null) return false
         return try {

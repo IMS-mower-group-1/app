@@ -8,8 +8,11 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import dagger.hilt.android.AndroidEntryPoint
+import se.ju.student.robomow.BluetoothClient
+import se.ju.student.robomow.BluetoothClientHolder
 import se.ju.student.robomow.R
 import se.ju.student.robomow.api.RoboMowApi
 import javax.inject.Inject
@@ -18,6 +21,9 @@ import javax.inject.Inject
 class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var roboMowApi: RoboMowApi
+    private val bluetoothClient: BluetoothClient?
+        get() = BluetoothClientHolder.bluetoothClient
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -30,11 +36,22 @@ class MainActivity : AppCompatActivity() {
         }
         requestPermission()
 
-
         val connectButton = findViewById<Button>(R.id.connect_button)
         connectButton.setOnClickListener {
             Intent(this, DeviceListActivity::class.java).also {
                 startActivity(it)
+            }
+        }
+
+        val controlButton = findViewById<Button>(R.id.control_button)
+        controlButton.setOnClickListener {
+            if (bluetoothClient == null) {
+                Toast.makeText(this, "Connect to a mower to control it", Toast.LENGTH_SHORT).show()
+            } else {
+                bluetoothClient!!.sendMessage("TAKE_CONTROL")
+                Intent(this, JoystickActivity::class.java).also {
+                    startActivity(it)
+                }
             }
         }
 
