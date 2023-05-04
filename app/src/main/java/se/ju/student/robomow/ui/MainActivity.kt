@@ -62,6 +62,24 @@ class MainActivity : AppCompatActivity() {
                 startActivity(it)
             }
         }
+
+        val startSessionButton = findViewById<Button>(R.id.start_session_button)
+        startSessionButton.setOnClickListener {
+            if (bluetoothClient == null) {
+                Toast.makeText(this, "Connect to a mower to start its session", Toast.LENGTH_SHORT).show()
+            } else {
+                bluetoothClient!!.sendMessage("START_SESSION")
+            }
+        }
+
+        val endSessionButton = findViewById<Button>(R.id.end_session_button)
+        endSessionButton.setOnClickListener {
+            if (bluetoothClient == null) {
+                Toast.makeText(this, "Connect to a mower to end its session", Toast.LENGTH_SHORT).show()
+            } else {
+                bluetoothClient!!.sendMessage("END_SESSION")
+            }
+        }
     }
 
     private fun requestPermission() {
