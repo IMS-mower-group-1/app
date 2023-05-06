@@ -10,7 +10,10 @@ import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import se.ju.student.robomow.BluetoothClient
 import se.ju.student.robomow.BluetoothClientHolder
 import se.ju.student.robomow.R
@@ -23,6 +26,26 @@ class MainActivity : AppCompatActivity() {
     lateinit var roboMowApi: RoboMowApi
     private val bluetoothClient: BluetoothClient?
         get() = BluetoothClientHolder.bluetoothClient
+
+    private fun handleBluetoothConnectionLost() {
+        // TODO: Handle connection lost
+        Toast.makeText(this, "Connection lost!!!", Toast.LENGTH_SHORT).show()
+    }
+    private fun handleBluetoothConnectionEstablished() {
+        // TODO: Handle connection established
+        Toast.makeText(this, "Connection established!!!", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        BluetoothClientHolder.connectionStatus?.onEach { connected ->
+            if (connected == true) {
+                handleBluetoothConnectionEstablished()
+            } else {
+                handleBluetoothConnectionLost()
+            }
+        }?.launchIn(lifecycleScope)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
