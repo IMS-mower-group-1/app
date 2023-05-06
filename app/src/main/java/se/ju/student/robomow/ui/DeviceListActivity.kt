@@ -132,6 +132,7 @@ class DeviceListActivity : AppCompatActivity() {
         )
         // Assign the new bluetoothClient to the singleton
         BluetoothClientHolder.bluetoothClient = bluetoothClient
+        BluetoothClientHolder.updateConnectionStatus(true)
     }
 
     private suspend fun createBond(device: BluetoothDevice) {

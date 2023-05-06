@@ -4,11 +4,13 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.util.Log
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.lang.Math.log
 import java.util.*
 
 class BluetoothClient(private val device: BluetoothDevice) {
@@ -18,14 +20,37 @@ class BluetoothClient(private val device: BluetoothDevice) {
     private var inputStream: InputStream? = null
     private var outputStream: OutputStream? = null
 
+    private lateinit var heartbeatJob: Job
+
+
     @SuppressLint("MissingPermission")
     suspend fun connect(): Boolean = withContext(Dispatchers.IO) {
-        disconnect()
         try {
             socket = device.createRfcommSocketToServiceRecord(uuid)
             socket?.connect()
             inputStream = socket?.inputStream
             outputStream = socket?.outputStream
+
+            heartbeatJob = CoroutineScope(Dispatchers.IO).launch {
+                while (true) {
+                    val timeoutOccurred = withTimeoutOrNull(10000) {
+                        while (true) {
+                            val message = readMessage()
+                            Log.d("pulse", message.toString())
+                            if (message == "1") {
+                                break
+                            }
+                        }
+                        false
+                    } ?: true
+
+                    if (timeoutOccurred) {
+                        BluetoothClientHolder.disconnect()
+                        break
+                    }
+                }
+            }
+
         } catch (e: IOException) {
             Log.e("BluetoothClient", "Error connecting to socket", e)
             return@withContext false
@@ -65,6 +90,8 @@ class BluetoothClient(private val device: BluetoothDevice) {
 
     fun disconnect() {
         try {
+            Log.d("pulse", "DISCONNECTING")
+            heartbeatJob.cancel()
             socket?.close()
             inputStream?.close()
             outputStream?.close()
