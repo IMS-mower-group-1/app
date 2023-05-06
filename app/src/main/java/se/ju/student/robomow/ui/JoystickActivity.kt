@@ -8,7 +8,10 @@ import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import se.ju.student.robomow.BluetoothClient
 import se.ju.student.robomow.BluetoothClientHolder
 import se.ju.student.robomow.R
@@ -22,6 +25,16 @@ class JoystickActivity : AppCompatActivity(), JoystickView.JoystickListener {
 
     private lateinit var joystickView: JoystickView
     private var bluetoothClient: BluetoothClient? = null
+
+    override fun onResume() {
+        super.onResume()
+        BluetoothClientHolder.connectionStatus?.onEach { connected ->
+            if (connected == false) {
+                Toast.makeText(this, "Connect to a mower to control it", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        }?.launchIn(lifecycleScope)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

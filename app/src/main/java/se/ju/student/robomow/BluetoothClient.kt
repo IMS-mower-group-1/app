@@ -5,12 +5,9 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.util.Log
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-import java.lang.Math.log
 import java.util.*
 
 class BluetoothClient(private val device: BluetoothDevice) {
