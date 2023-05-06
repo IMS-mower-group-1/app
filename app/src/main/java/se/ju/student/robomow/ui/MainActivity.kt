@@ -8,8 +8,11 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
@@ -27,13 +30,26 @@ class MainActivity : AppCompatActivity() {
     private val bluetoothClient: BluetoothClient?
         get() = BluetoothClientHolder.bluetoothClient
 
+    private lateinit var connectionStatusImage: ImageView
+    private lateinit var connectionStatusText: TextView
+    private lateinit var connectButton: Button
+
     private fun handleBluetoothConnectionLost() {
-        // TODO: Handle connection lost
-        Toast.makeText(this, "Connection lost!!!", Toast.LENGTH_SHORT).show()
+        connectButton.setBackgroundColor(ContextCompat.getColor(this, R.color.blue_dark))
+        connectButton.text = "Connect"
+
+        connectionStatusImage.setImageAlpha(51) // Set opacity to 20%
+        connectionStatusText.text = "Disconnected"
+        connectionStatusText.setTextColor(ContextCompat.getColor(this, R.color.warning_red))
     }
+
     private fun handleBluetoothConnectionEstablished() {
-        // TODO: Handle connection established
-        Toast.makeText(this, "Connection established!!!", Toast.LENGTH_SHORT).show()
+        connectButton.setBackgroundColor(ContextCompat.getColor(this, R.color.warning_red))
+        connectButton.text = "Disconnect"
+
+        connectionStatusImage.setImageAlpha(255) // Set opacity to 100%
+        connectionStatusText.text = "Connected"
+        connectionStatusText.setTextColor(ContextCompat.getColor(this, R.color.success_green))
     }
 
     override fun onResume() {
@@ -51,6 +67,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        connectionStatusImage = findViewById(R.id.connection_status_image)
+        connectionStatusText = findViewById(R.id.connection_status_text)
+        connectButton = findViewById(R.id.connect_button)
 
         val bluetoothManager: BluetoothManager = getSystemService(BluetoothManager::class.java)
         val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
@@ -59,10 +78,13 @@ class MainActivity : AppCompatActivity() {
         }
         requestPermission()
 
-        val connectButton = findViewById<Button>(R.id.connect_button)
         connectButton.setOnClickListener {
-            Intent(this, DeviceListActivity::class.java).also {
-                startActivity(it)
+            if(connectButton.text == "Connect"){
+                Intent(this, DeviceListActivity::class.java).also {
+                    startActivity(it)
+                }
+            } else {
+                BluetoothClientHolder.disconnect()
             }
         }
 

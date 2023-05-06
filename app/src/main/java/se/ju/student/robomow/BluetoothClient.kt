@@ -33,7 +33,7 @@ class BluetoothClient(private val device: BluetoothDevice) {
 
             heartbeatJob = CoroutineScope(Dispatchers.IO).launch {
                 while (true) {
-                    val timeoutOccurred = withTimeoutOrNull(10000) {
+                    val timeoutOccurred = withTimeoutOrNull(6000) {
                         while (true) {
                             val message = readMessage()
                             Log.d("pulse", message.toString())
