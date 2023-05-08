@@ -46,7 +46,7 @@ class MowSessionAdapter(
     }
 
     fun updateData(newData: List<MowSession>) {
-        mowSessions = newData
+        mowSessions = newData.sortedWith(compareBy({ !mowSessionIsComplete(it) }, { it.start.seconds })).reversed()
         notifyDataSetChanged()
     }
 
