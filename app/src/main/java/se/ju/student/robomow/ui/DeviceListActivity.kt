@@ -123,6 +123,7 @@ class DeviceListActivity : AppCompatActivity() {
                 progressDialog.dismiss()
                 Toast.makeText(this@DeviceListActivity, "Connected to the device", Toast.LENGTH_SHORT).show()
                 onConnectionSuccess()
+                BluetoothClientHolder.updateConnectionStatus(true)
             },
             onFailed = {
                 progressDialog.dismiss()
