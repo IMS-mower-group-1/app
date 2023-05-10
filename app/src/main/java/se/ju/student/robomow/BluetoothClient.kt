@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.util.Log
+import io.reactivex.rxjava3.subjects.PublishSubject
 import kotlinx.coroutines.*
 import java.io.IOException
 import java.io.InputStream
@@ -16,6 +17,9 @@ class BluetoothClient(private val device: BluetoothDevice) {
     private var socket: BluetoothSocket? = null
     private var inputStream: InputStream? = null
     private var outputStream: OutputStream? = null
+
+    // Shared data buffer
+    private val sharedBuffer = PublishSubject.create<String>()
 
     private lateinit var heartbeatJob: Job
 
@@ -33,6 +37,7 @@ class BluetoothClient(private val device: BluetoothDevice) {
                     val timeoutOccurred = withTimeoutOrNull(6000) {
                         while (true) {
                             val message = readMessage()
+                            message?.let { sharedBuffer.onNext(it) }
                             Log.d("pulse", message.toString())
                             if (message == "1") {
                                 break
@@ -55,8 +60,9 @@ class BluetoothClient(private val device: BluetoothDevice) {
         return@withContext true
     }
 
-    fun isConnected(): Boolean {
-        return socket?.isConnected ?: false
+
+    fun getSharedBuffer(): PublishSubject<String> {
+        return sharedBuffer
     }
 
     fun sendMessage(message: String): Boolean {
@@ -92,6 +98,8 @@ class BluetoothClient(private val device: BluetoothDevice) {
             socket?.close()
             inputStream?.close()
             outputStream?.close()
+
+            sharedBuffer.onComplete()
         } catch (e: IOException) {
             Log.e("BluetoothClient", "Error disconnecting from socket", e)
         }
