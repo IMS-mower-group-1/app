@@ -12,5 +12,6 @@
     <color name="off_white">#F5F5F5</color>
     <color name="red">#FFFF0000</color>
     <color name="warning_red">#d0342c</color>
+    <color name="completed_session_indicator_color">#9E9E9E</color>
     <color name="success_green">#4BB543</color>
 </resources>

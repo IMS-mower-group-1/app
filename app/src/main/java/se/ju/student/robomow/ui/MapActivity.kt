@@ -34,7 +34,7 @@ class MapActivity : AppCompatActivity(), MapView.CollisionAvoidanceListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
         mapView = findViewById(R.id.map_view)
-        progressBar = findViewById(R.id.progress_bar)
+        progressBar = findViewById(R.id.progress_indicator)
         mapView.listener = this
         setupMapInformationDialog()
         val mowSession = getMowSession()

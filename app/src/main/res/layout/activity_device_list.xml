@@ -6,6 +6,13 @@
     android:orientation="vertical"
     tools:context=".ui.DeviceListActivity">
 
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:id="@+id/progress_indicator"
+        android:visibility="gone" />
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -33,5 +40,4 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
-
 </LinearLayout>
