@@ -1,10 +1,12 @@
 package se.ju.student.robomow.adapter
 
 import android.content.Context
+import android.graphics.drawable.ColorDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import se.ju.student.robomow.R
 import se.ju.student.robomow.model.MowSession
@@ -20,7 +22,7 @@ class MowSessionAdapter(
 ) : RecyclerView.Adapter<MowSessionAdapter.MowSessionViewHolder>() {
     class MowSessionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val date: TextView = itemView.findViewById(R.id.mow_session_date)
-        val status: TextView = itemView.findViewById(R.id.mow_session_status)
+        val status: View = itemView.findViewById(R.id.mow_session_status_indicator)
         val collisions: TextView = itemView.findViewById(R.id.mow_session_collisions)
         val mowingTime: TextView = itemView.findViewById(R.id.mow_session_mowing_time)
     }
@@ -34,29 +36,30 @@ class MowSessionAdapter(
     override fun onBindViewHolder(holder: MowSessionViewHolder, position: Int) {
         val mowSession = mowSessions[position]
         holder.date.text = getDateTimeFromTimeStamp(mowSession.start.seconds)
-        holder.status.text = getMowingStatus(mowSession)
         holder.collisions.text = context.getString(
             R.string.avoided_collisions,
             mowSession.avoidedCollisions.size
         )
         holder.itemView.setOnClickListener { onItemClicked(mowSession) }
         holder.mowingTime.text = getMowingTime(mowSession)
+        holder.status.background = ColorDrawable(getStatusIndicatorColor(mowSession))
     }
 
     fun updateData(newData: List<MowSession>) {
-        mowSessions = newData
+        mowSessions = newData.sortedWith(compareBy({ !mowSessionIsComplete(it) }, { it.start.seconds })).reversed()
         notifyDataSetChanged()
-    }
-
-    private fun getMowingStatus(mowSession: MowSession): String {
-        if (mowSessionIsComplete(mowSession)) {
-            return context.getString(R.string.mowing_status_complete)
-        }
-        return context.getString(R.string.mowing_status_active)
     }
 
     private fun mowSessionIsComplete(mowSession: MowSession): Boolean {
         return mowSession.end != null
+    }
+
+    private fun getStatusIndicatorColor(mowSession: MowSession): Int{
+        return if (mowSessionIsComplete(mowSession)) {
+            ContextCompat.getColor(context, R.color.completed_session_indicator_color)
+        } else {
+            ContextCompat.getColor(context, R.color.success_green)
+        }
     }
 
     private fun convertToHoursMinutes(startTimeStamp: Long, endTimeStamp: Long): Pair<Int, Int> {
