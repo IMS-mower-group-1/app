@@ -2,6 +2,7 @@ package se.ju.student.robomow.ui.view
 
 import android.content.Context
 import android.graphics.*
+import android.graphics.drawable.BitmapDrawable
 import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -33,24 +34,43 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
 
     var listener: CollisionAvoidanceListener? = null
 
+    private val grassTexture: BitmapDrawable = context.getDrawable(R.drawable.grass_texture) as BitmapDrawable
+    // New paint object with grassTexture as shader
+    val paint = Paint().apply {
+        shader = BitmapShader(
+            grassTexture.bitmap,
+            Shader.TileMode.REPEAT,
+            Shader.TileMode.REPEAT
+        )
+    }
+
     interface CollisionAvoidanceListener {
         fun onCollisionAvoidanceClicked(collision: AvoidedCollisions)
     }
+
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         //Center the view on 0,0
         canvas.translate(width / 2f, height / 2f)
         canvas.save()
-        //canvas.drawColor(Color.GREEN)
+
+
+        // Draw a rectangle that fills the canvas with our paint object which is a grass texture
+        canvas.drawRect(
+            -width / 2f,
+            -height / 2f,
+            width / 2f,
+            height / 2f,
+            paint
+        )
+
         canvas.translate(translationX, translationY)
         canvas.scale(scaleFactor, scaleFactor)
         canvas.drawPath(path, MapConstants.pathPaint)
         collisionAvoidanceCircleAndAvoidedCollisions.forEach {
             canvas.drawCircle(it.first.x, it.first.y, it.first.radius, collisionPaint)
         }
-
-
         canvas.restore()
     }
 
