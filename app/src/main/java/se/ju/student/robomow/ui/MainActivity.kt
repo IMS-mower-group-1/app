@@ -7,10 +7,8 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
+import android.view.View
+import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -39,6 +37,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var startSessionButton: Button
     private lateinit var endSessionButton: Button
+
+    private lateinit var progressBar: ProgressBar
 
     private var subscription: Disposable? = null
 
@@ -74,6 +74,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        progressBar = findViewById(R.id.progress_indicator)
 
         connectionStatusImage = findViewById(R.id.connection_status_image)
         connectionStatusText = findViewById(R.id.connection_status_text)
@@ -122,7 +124,7 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Connect to a mower to start its session", Toast.LENGTH_SHORT).show()
             } else {
                 disableSessionButtons()
-                // TODO: show loading bar
+                progressBar.visibility = View.VISIBLE
                 bluetoothClient!!.sendMessage("START_SESSION")
                 subscription = bluetoothClient!!.getSharedBuffer()
                     .observeOn(AndroidSchedulers.mainThread())
@@ -131,12 +133,12 @@ class MainActivity : AppCompatActivity() {
                         Log.d("pulsePi4", "Received: $message")
                         if(message == "Success"){
                             enableSessionButtons()
-                            // TODO: dismiss loading bar
+                            progressBar.visibility = View.GONE
                             Toast.makeText(this, "Session started", Toast.LENGTH_SHORT).show()
                             subscription?.dispose()
                         } else if(message == "Failure"){
                             enableSessionButtons()
-                            // TODO: dismiss loading bar
+                            progressBar.visibility = View.GONE
                             Toast.makeText(this, "Failed to start session", Toast.LENGTH_SHORT).show()
                             subscription?.dispose()
                         }
@@ -150,7 +152,7 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Connect to a mower to end its session", Toast.LENGTH_SHORT).show()
             } else {
                 disableSessionButtons()
-                // TODO: show loading bar
+                progressBar.visibility = View.VISIBLE
                 bluetoothClient!!.sendMessage("END_SESSION")
                 subscription = bluetoothClient!!.getSharedBuffer()
                     .observeOn(AndroidSchedulers.mainThread())
@@ -159,12 +161,12 @@ class MainActivity : AppCompatActivity() {
                         Log.d("pulsePi4", "Received: $message")
                         if(message == "Success"){
                             enableSessionButtons()
-                            // TODO: dismiss loading bar
+                            progressBar.visibility = View.GONE
                             Toast.makeText(this, "Session ended", Toast.LENGTH_SHORT).show()
                             subscription?.dispose()
                         } else if(message == "Failure"){
                             enableSessionButtons()
-                            // TODO: dismiss loading bar
+                            progressBar.visibility = View.GONE
                             Toast.makeText(this, "Failed to end session", Toast.LENGTH_SHORT).show()
                             subscription?.dispose()
                         }
