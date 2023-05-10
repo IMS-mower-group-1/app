@@ -37,6 +37,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var connectionStatusText: TextView
     private lateinit var connectButton: Button
 
+    private lateinit var startSessionButton: Button
+    private lateinit var endSessionButton: Button
+
     private var subscription: Disposable? = null
 
     private fun handleBluetoothConnectionLost() {
@@ -113,12 +116,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val startSessionButton = findViewById<Button>(R.id.start_session_button)
+        startSessionButton = findViewById<Button>(R.id.start_session_button)
         startSessionButton.setOnClickListener {
             if (bluetoothClient == null) {
                 Toast.makeText(this, "Connect to a mower to start its session", Toast.LENGTH_SHORT).show()
             } else {
-                // TODO: disable session buttons and show loading bar
+                disableSessionButtons()
+                // TODO: show loading bar
                 bluetoothClient!!.sendMessage("START_SESSION")
                 subscription = bluetoothClient!!.getSharedBuffer()
                     .observeOn(AndroidSchedulers.mainThread())
@@ -126,11 +130,13 @@ class MainActivity : AppCompatActivity() {
                         // This will be called every time a new message is added to the buffer
                         Log.d("pulsePi4", "Received: $message")
                         if(message == "Success"){
-                            // TODO: enable session buttons & dismiss loading bar
+                            enableSessionButtons()
+                            // TODO: dismiss loading bar
                             Toast.makeText(this, "Session started", Toast.LENGTH_SHORT).show()
                             subscription?.dispose()
                         } else if(message == "Failure"){
-                            // TODO: enable session buttons & dismiss loading bar
+                            enableSessionButtons()
+                            // TODO: dismiss loading bar
                             Toast.makeText(this, "Failed to start session", Toast.LENGTH_SHORT).show()
                             subscription?.dispose()
                         }
@@ -138,12 +144,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val endSessionButton = findViewById<Button>(R.id.end_session_button)
+        endSessionButton = findViewById<Button>(R.id.end_session_button)
         endSessionButton.setOnClickListener {
             if (bluetoothClient == null) {
                 Toast.makeText(this, "Connect to a mower to end its session", Toast.LENGTH_SHORT).show()
             } else {
-                // TODO: disable session buttons and show loading bar
+                disableSessionButtons()
+                // TODO: show loading bar
                 bluetoothClient!!.sendMessage("END_SESSION")
                 subscription = bluetoothClient!!.getSharedBuffer()
                     .observeOn(AndroidSchedulers.mainThread())
@@ -151,17 +158,29 @@ class MainActivity : AppCompatActivity() {
                         // This will be called every time a new message is added to the buffer
                         Log.d("pulsePi4", "Received: $message")
                         if(message == "Success"){
-                            // TODO: enable session buttons & dismiss loading bar
+                            enableSessionButtons()
+                            // TODO: dismiss loading bar
                             Toast.makeText(this, "Session ended", Toast.LENGTH_SHORT).show()
                             subscription?.dispose()
                         } else if(message == "Failure"){
-                            // TODO: enable session buttons & dismiss loading bar
+                            enableSessionButtons()
+                            // TODO: dismiss loading bar
                             Toast.makeText(this, "Failed to end session", Toast.LENGTH_SHORT).show()
                             subscription?.dispose()
                         }
                     }
             }
         }
+    }
+
+    private fun disableSessionButtons(){
+        startSessionButton.isEnabled = false
+        endSessionButton.isEnabled = false
+    }
+
+    private fun enableSessionButtons(){
+        startSessionButton.isEnabled = true
+        endSessionButton.isEnabled = true
     }
 
     private fun requestPermission() {
