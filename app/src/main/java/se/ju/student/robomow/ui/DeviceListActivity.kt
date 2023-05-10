@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import android.app.ProgressDialog
 import android.os.Handler
 import android.os.Looper
+import android.view.View
 import android.widget.*
 import androidx.core.app.ActivityCompat
 import dagger.hilt.android.AndroidEntryPoint
@@ -34,7 +35,7 @@ class DeviceListActivity : AppCompatActivity() {
     private val mainScope = CoroutineScope(Dispatchers.Main)
 
     // Add a progress dialog to show during the pairing process
-    private lateinit var progressDialog: ProgressDialog
+    private lateinit var progressBar: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,12 +65,7 @@ class DeviceListActivity : AppCompatActivity() {
 
         }
 
-        // Initialize the progress dialog
-        progressDialog = ProgressDialog(this).apply {
-            setMessage("Pairing...")
-            setCancelable(false)
-            setCanceledOnTouchOutside(false)
-        }
+        progressBar = findViewById(R.id.progress_indicator)
 
         pairedDevicesListView.onItemClickListener =
             AdapterView.OnItemClickListener { _, _, position, _ ->
@@ -90,7 +86,7 @@ class DeviceListActivity : AppCompatActivity() {
 
     private fun connectToDevice(device: BluetoothDevice) {
         // Show the progress dialog
-        progressDialog.show()
+        progressBar.visibility = View.VISIBLE
 
         // Register the BroadcastReceiver to listen for the bonding process to complete
         val intentFilter = IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
@@ -110,25 +106,21 @@ class DeviceListActivity : AppCompatActivity() {
     }
 
     private fun connectToPairedDevice(device: BluetoothDevice) {
-        connectToSocket(device) {
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-        }
+        connectToSocket(device) {}
     }
 
     private fun connectToSocket(device: BluetoothDevice, onConnectionSuccess: () -> Unit) {
         val bluetoothClient = (application as RoboMowApplication).connectToDevice(
             device,
             onConnected = {
-                progressDialog.dismiss()
+                progressBar.visibility = View.GONE
                 Toast.makeText(this@DeviceListActivity, "Connected to the device", Toast.LENGTH_SHORT).show()
                 onConnectionSuccess()
                 BluetoothClientHolder.updateConnectionStatus(true)
             },
             onFailed = {
-                progressDialog.dismiss()
+                progressBar.visibility = View.GONE
                 Toast.makeText(this@DeviceListActivity, "Failed to connect to the device", Toast.LENGTH_SHORT).show()
-                finish()
             }
         )
         // Assign the new bluetoothClient to the singleton
@@ -168,19 +160,19 @@ class DeviceListActivity : AppCompatActivity() {
                                 "Failed to pair with the device",
                                 Toast.LENGTH_SHORT
                             ).show()
-                            progressDialog.dismiss()
+                            progressBar.visibility = View.GONE
                             context?.unregisterReceiver(this) // Unregister BroadcastReceiver
                         }
                         BluetoothDevice.BOND_BONDING -> {
                             // Pairing is in progress
                         }
                         else -> {
-                            progressDialog.dismiss()
+                            progressBar.visibility = View.GONE
                             context?.unregisterReceiver(this) // Unregister BroadcastReceiver
                         }
                     }
                 } else {
-                    progressDialog.dismiss()
+                    progressBar.visibility = View.GONE
                     context?.unregisterReceiver(this) // Unregister BroadcastReceiver
                 }
             }
