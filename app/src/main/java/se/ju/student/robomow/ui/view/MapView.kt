@@ -7,6 +7,7 @@ import android.view.MotionEvent
 import android.view.View
 import se.ju.student.robomow.model.Position
 import se.ju.student.robomow.R
+import se.ju.student.robomow.data.CollisionAvoidanceCircle
 import se.ju.student.robomow.model.AvoidedCollisions
 import se.ju.student.robomow.ui.constants.MapConstants
 import se.ju.student.robomow.ui.view.utils.MapUtils
@@ -19,8 +20,10 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private val startPositionPaint = MapConstants.startPositionPaint
     private val startTextPaint = MapConstants.startTextPaint
     private val collisionPaint = MapConstants.collisionPaint
-    private val rectFAndAvoidedCollisions = mutableListOf<Pair<RectF, AvoidedCollisions>>()
+    private val collisionAvoidanceCircleAndAvoidedCollisions =
+        mutableListOf<Pair<CollisionAvoidanceCircle, AvoidedCollisions>>()
     var listener: CollisionAvoidanceListener? = null
+
 
     private val path = Path()
     private var scaleFactor = 50f
@@ -65,9 +68,6 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         canvas.save()
         canvas.drawPath(path, pathPaint)
         canvas.restore()
-        rectFAndAvoidedCollisions.forEach {
-            canvas.drawRect(it.first, collisionPaint)
-        }
         // Draw the mower at the last position on the path
         positions.takeLast(2).let { lastTwoPositions ->
             if (lastTwoPositions.size == 2) {
@@ -83,6 +83,9 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             val startX = (positions[0].x * scaleFactor) + centerX
             val startY = (positions[0].y * scaleFactor) + centerY
             MapUtils.drawStartPosition(canvas, startX, startY)
+        }
+        collisionAvoidanceCircleAndAvoidedCollisions.forEach {
+            canvas.drawCircle(it.first.x, it.first.y, it.first.radius, collisionPaint)
         }
     }
 
@@ -154,7 +157,7 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
             MotionEvent.ACTION_DOWN -> {
                 val x = event.x
                 val y = event.y
-                rectFAndAvoidedCollisions.forEach {
+                collisionAvoidanceCircleAndAvoidedCollisions.forEach {
                     if (isCollisionAvoidanceClicked(x, y, it.first)) {
                         listener?.onCollisionAvoidanceClicked(it.second)
                         return true
@@ -176,9 +179,15 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
         avoidedCollisions?.let {
             val pos = Position(x, -y)
             val avoidedCollision = avoidedCollisions.find { it.position == pos }
-            val rectSize = 20
-            avoidedCollision?.let {
-                rectFAndAvoidedCollisions.add(Pair(RectF(canvasX, canvasY, canvasX + rectSize, canvasY + rectSize), it))
+            avoidedCollision?.let {avoidedCollision
+                collisionAvoidanceCircleAndAvoidedCollisions.add(
+                    Pair(
+                        CollisionAvoidanceCircle(
+                            canvasX,
+                            canvasY
+                        ), avoidedCollision
+                    )
+                )
             }
         }
     }
@@ -186,12 +195,13 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private fun isCollisionAvoidanceClicked(
         x: Float,
         y: Float,
-        avoidedCollisionRect: RectF
+        collisionAvoidanceCircle: CollisionAvoidanceCircle
     ): Boolean {
-        val rectPadding = 20
-        if (x >= avoidedCollisionRect.left - rectPadding && x <= avoidedCollisionRect.right + rectPadding && y >= avoidedCollisionRect.top - rectPadding && y <= avoidedCollisionRect.bottom + rectPadding) {
-            return true
-        }
-        return false
+        val circlePadding = 30
+        return (x >= collisionAvoidanceCircle.x - circlePadding
+            && x <= collisionAvoidanceCircle.x + circlePadding
+            && y >= collisionAvoidanceCircle.y - circlePadding
+            && y <= collisionAvoidanceCircle.y + circlePadding
+        )
     }
 }
