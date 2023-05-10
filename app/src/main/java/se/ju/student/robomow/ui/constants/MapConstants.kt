@@ -9,7 +9,7 @@ object MapConstants {
     const val START_POSITION_COLOR = Color.BLUE
     const val START_POSITION_TEXT_COLOR = Color.WHITE
     const val TEXT_SIZE = 30f
-    const val PATH_STROKE_WIDTH = 30f
+    const val PATH_STROKE_WIDTH = 15f
     const val BORDER_STROKE_WIDTH = 20f
     const val MAX_SCALE_FACTOR = 50f
     const val MARGIN = 20f
