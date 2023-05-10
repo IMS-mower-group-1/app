@@ -14,6 +14,7 @@ import se.ju.student.robomow.model.AvoidedCollisions
 import se.ju.student.robomow.model.Position
 import se.ju.student.robomow.ui.constants.MapConstants
 import se.ju.student.robomow.ui.constants.MapConstants.collisionPaint
+import se.ju.student.robomow.ui.view.utils.MapUtils
 import kotlin.math.min
 import kotlin.math.max
 
@@ -58,7 +59,6 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
         fun onCollisionAvoidanceClicked(collision: AvoidedCollisions)
     }
 
-
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         //Center the view on 0,0
@@ -92,6 +92,14 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
         collisionAvoidanceCircleAndAvoidedCollisions.forEach {
             canvas.drawCircle(it.first.x, it.first.y, it.first.radius, collisionPaint)
         }
+
+        // Draw the start position
+        if (positions.isNotEmpty()) {
+            val startX = (positions[0].x * scaleConstant)
+            val startY = (positions[0].y * scaleConstant)
+            MapUtils.drawStartPosition(canvas, startX, startY)
+        }
+
         canvas.restore()
     }
 
