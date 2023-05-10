@@ -44,6 +44,16 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
         )
     }
 
+    // Bitmap and matrix for the mower image
+    private val mowerBitmap: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.husq_mower)
+    private val scaledMowerBitmap: Bitmap = Bitmap.createScaledBitmap(
+        mowerBitmap,
+        (mowerBitmap.width * MapConstants.IMAGE_WIDTH_SCALE).toInt(), // Scale the width down from the original width
+        (mowerBitmap.height * MapConstants.IMAGE_HEIGHT_SCALE).toInt(), // Scale the height down from the original height
+        true
+    )
+    private val mowerMatrix = Matrix()
+
     interface CollisionAvoidanceListener {
         fun onCollisionAvoidanceClicked(collision: AvoidedCollisions)
     }
@@ -55,7 +65,6 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
         canvas.translate(width / 2f, height / 2f)
         canvas.save()
 
-
         // Draw a rectangle that fills the canvas with our paint object which is a grass texture
         canvas.drawRect(
             -width / 2f,
@@ -65,8 +74,20 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
             paint
         )
 
-        canvas.translate(translationX, translationY)
         canvas.scale(scaleFactor, scaleFactor)
+        canvas.translate(translationX, translationY)
+
+        // Draw the mower at the last position on the path
+        positions.takeLast(2).let { lastTwoPositions ->
+            if (lastTwoPositions.size == 2) {
+                val lastPosition = lastTwoPositions[1]
+                val canvasX = (lastPosition.x * scaleConstant)
+                val canvasY = (lastPosition.y * scaleConstant)
+                val rotation = calculateAngle(lastTwoPositions[0], lastTwoPositions[1])
+                drawMower(canvas, canvasX, canvasY, rotation)
+            }
+        }
+
         canvas.drawPath(path, MapConstants.pathPaint)
         collisionAvoidanceCircleAndAvoidedCollisions.forEach {
             canvas.drawCircle(it.first.x, it.first.y, it.first.radius, collisionPaint)
@@ -135,8 +156,8 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
 
             path.reset()
             positions.forEachIndexed { index, coordinate ->
-                val canvasX = (coordinate.x * scaleFactor * scaleConstant)
-                val canvasY = (coordinate.y * scaleFactor * scaleConstant)
+                val canvasX = (coordinate.x * scaleConstant)
+                val canvasY = (coordinate.y * scaleConstant)
 
                 if (index == 0) {
                     path.moveTo(canvasX, canvasY)
@@ -154,6 +175,26 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
             //scaledGrassBitmap = Bitmap.createScaledBitmap(grassBitmap, width, height, true)
         }
         invalidate()
+    }
+
+    // Draw the mower image at the specified position and rotation
+    private fun drawMower(canvas: Canvas, x: Float, y: Float, rotation: Float) {
+        val halfWidth = scaledMowerBitmap.width / 2f
+        val halfHeight = scaledMowerBitmap.height / 2f
+
+        mowerMatrix.reset()
+        mowerMatrix.postRotate(rotation, halfWidth, halfHeight)
+        mowerMatrix.postTranslate(x - halfWidth, y - halfHeight)
+
+        canvas.drawBitmap(scaledMowerBitmap, mowerMatrix, null) // null can be replaced with a custom Paint object if needed
+    }
+
+    // Calculate the angle between two positions
+    private fun calculateAngle(start: Position, end: Position): Float {
+        val delta_x = end.x - start.x
+        val delta_y = end.y - start.y
+        val rotation = Math.toDegrees(Math.atan2(delta_y.toDouble(), delta_x.toDouble())).toFloat()
+        return if (rotation < 0) rotation + 360 else rotation
     }
 
     private fun addCollisionAvoidanceCircleAndCollisionAvoidance(
