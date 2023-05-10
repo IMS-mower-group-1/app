@@ -15,11 +15,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.Disposable
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import se.ju.student.robomow.BluetoothClient
 import se.ju.student.robomow.BluetoothClientHolder
 import se.ju.student.robomow.R
+import io.reactivex.rxjava3.subjects.PublishSubject
 import se.ju.student.robomow.api.RoboMowApi
 import javax.inject.Inject
 
@@ -33,6 +36,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var connectionStatusImage: ImageView
     private lateinit var connectionStatusText: TextView
     private lateinit var connectButton: Button
+
+    private var subscription: Disposable? = null
 
     private fun handleBluetoothConnectionLost() {
         connectButton.setBackgroundColor(ContextCompat.getColor(this, R.color.blue_dark))
@@ -113,7 +118,23 @@ class MainActivity : AppCompatActivity() {
             if (bluetoothClient == null) {
                 Toast.makeText(this, "Connect to a mower to start its session", Toast.LENGTH_SHORT).show()
             } else {
+                // TODO: disable session buttons and show loading bar
                 bluetoothClient!!.sendMessage("START_SESSION")
+                subscription = bluetoothClient!!.getSharedBuffer()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe { message ->
+                        // This will be called every time a new message is added to the buffer
+                        Log.d("pulsePi4", "Received: $message")
+                        if(message == "Success"){
+                            // TODO: enable session buttons & dismiss loading bar
+                            Toast.makeText(this, "Session started", Toast.LENGTH_SHORT).show()
+                            subscription?.dispose()
+                        } else if(message == "Failure"){
+                            // TODO: enable session buttons & dismiss loading bar
+                            Toast.makeText(this, "Failed to start session", Toast.LENGTH_SHORT).show()
+                            subscription?.dispose()
+                        }
+                    }
             }
         }
 
@@ -122,7 +143,23 @@ class MainActivity : AppCompatActivity() {
             if (bluetoothClient == null) {
                 Toast.makeText(this, "Connect to a mower to end its session", Toast.LENGTH_SHORT).show()
             } else {
+                // TODO: disable session buttons and show loading bar
                 bluetoothClient!!.sendMessage("END_SESSION")
+                subscription = bluetoothClient!!.getSharedBuffer()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe { message ->
+                        // This will be called every time a new message is added to the buffer
+                        Log.d("pulsePi4", "Received: $message")
+                        if(message == "Success"){
+                            // TODO: enable session buttons & dismiss loading bar
+                            Toast.makeText(this, "Session ended", Toast.LENGTH_SHORT).show()
+                            subscription?.dispose()
+                        } else if(message == "Failure"){
+                            // TODO: enable session buttons & dismiss loading bar
+                            Toast.makeText(this, "Failed to end session", Toast.LENGTH_SHORT).show()
+                            subscription?.dispose()
+                        }
+                    }
             }
         }
     }
@@ -156,4 +193,11 @@ class MainActivity : AppCompatActivity() {
                 Log.d("test006", "${it.key} = ${it.value}")
             }
         }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        // Dispose of ongoing subscriptions
+        subscription?.dispose()
+    }
 }
