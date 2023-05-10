@@ -19,14 +19,15 @@ import se.ju.student.robomow.api.RoboMowApi
 import se.ju.student.robomow.ui.view.MapView
 import se.ju.student.robomow.model.AvoidedCollisions
 import se.ju.student.robomow.model.MowSession
+import se.ju.student.robomow.ui.view.ZoomableMapView
 import javax.inject.Inject
 
 @AndroidEntryPoint
 
-class MapActivity : AppCompatActivity(), MapView.CollisionAvoidanceListener {
+class MapActivity : AppCompatActivity(), ZoomableMapView.CollisionAvoidanceListener {
     @Inject
     lateinit var roboMowApi: RoboMowApi
-    private lateinit var mapView: MapView
+    private lateinit var mapView: ZoomableMapView
     private lateinit var progressBar: ProgressBar
     private lateinit var informationDialog: Dialog
 
