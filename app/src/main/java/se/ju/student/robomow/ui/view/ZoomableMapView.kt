@@ -74,8 +74,8 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
             paint
         )
 
-        canvas.scale(scaleFactor, scaleFactor)
         canvas.translate(translationX, translationY)
+        canvas.scale(scaleFactor, scaleFactor)
 
         // Draw the mower at the last position on the path
         positions.takeLast(2).let { lastTwoPositions ->
