@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
-import android.widget.CheckBox
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
@@ -16,7 +15,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import se.ju.student.robomow.R
 import se.ju.student.robomow.api.RoboMowApi
-import se.ju.student.robomow.ui.view.MapView
 import se.ju.student.robomow.model.AvoidedCollisions
 import se.ju.student.robomow.model.MowSession
 import se.ju.student.robomow.ui.view.ZoomableMapView
@@ -37,7 +35,7 @@ class MapActivity : AppCompatActivity(), ZoomableMapView.CollisionAvoidanceListe
         mapView = findViewById(R.id.map_view)
         progressBar = findViewById(R.id.progress_indicator)
         mapView.listener = this
-        setupMapInformationDialog()
+        handleMapInformationDialog()
         val mowSession = getMowSession()
         mapView.setCoordinates(mowSession?.path, mowSession?.avoidedCollisions)
     }
@@ -75,30 +73,30 @@ class MapActivity : AppCompatActivity(), ZoomableMapView.CollisionAvoidanceListe
     }
 
     override fun onInformationOverviewClicked() {
-        setupMapInformationDialog()
+        showMapInformationDialog()
     }
 
-    private fun setupMapInformationDialog() {
+    private fun handleMapInformationDialog() {
         val sharedPref = this.getPreferences(Context.MODE_PRIVATE)
         val hasShownMapOverview =
             sharedPref.getBoolean(getString(R.string.has_shown_map_overview_key), false)
         if (hasShownMapOverview) {
             return
         }
+        showMapInformationDialog()
+        with(sharedPref.edit()) {
+            putBoolean(getString(R.string.has_shown_map_overview_key), true)
+            apply()
+        }
+    }
+
+    private fun showMapInformationDialog() {
         informationDialog = Dialog(this)
         informationDialog.setContentView(R.layout.fragment_map_view_information)
-        val doNotShowAgain = informationDialog.findViewById<CheckBox>(R.id.do_not_show_again_checkbox)
         val dismissButton = informationDialog.findViewById<Button>(R.id.dismiss_button)
         dismissButton.setOnClickListener {
-            if (doNotShowAgain.isChecked) {
-                with(sharedPref.edit()) {
-                    putBoolean(getString(R.string.has_shown_map_overview_key), true)
-                    apply()
-                }
-            }
             informationDialog.dismiss()
         }
         informationDialog.show()
-
     }
 }
