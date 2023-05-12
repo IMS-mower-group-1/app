@@ -74,6 +74,10 @@ class MapActivity : AppCompatActivity(), ZoomableMapView.CollisionAvoidanceListe
         }
     }
 
+    override fun onInformationOverviewClicked() {
+        setupMapInformationDialog()
+    }
+
     private fun setupMapInformationDialog() {
         val sharedPref = this.getPreferences(Context.MODE_PRIVATE)
         val hasShownMapOverview =

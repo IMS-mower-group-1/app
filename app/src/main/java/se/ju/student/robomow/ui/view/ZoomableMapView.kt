@@ -35,7 +35,9 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
 
     var listener: CollisionAvoidanceListener? = null
 
-    private val grassTexture: BitmapDrawable = context.getDrawable(R.drawable.grass_texture) as BitmapDrawable
+    private val grassTexture: BitmapDrawable =
+        context.getDrawable(R.drawable.grass_texture) as BitmapDrawable
+
     // New paint object with grassTexture as shader
     val paint = Paint().apply {
         shader = BitmapShader(
@@ -57,11 +59,14 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
 
     interface CollisionAvoidanceListener {
         fun onCollisionAvoidanceClicked(collision: AvoidedCollisions)
+        fun onInformationOverviewClicked()
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         //Center the view on 0,0
+        val centeredWidth = width / 2f
+        val centeredHeight = height / 2f
         canvas.translate(width / 2f, height / 2f)
         canvas.save()
 
@@ -73,9 +78,16 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
             height / 2f,
             paint
         )
-
+        canvas.drawRect(
+            centeredWidth - 50,
+            -centeredHeight,
+            centeredWidth,
+            -centeredHeight + 59,
+            collisionPaint
+        )
         canvas.translate(translationX, translationY)
         canvas.scale(scaleFactor, scaleFactor)
+        //canvas.drawRect((w-500),h,w,h+500 ,Paint().apply { Color.WHITE })
 
         // Draw the mower at the last position on the path
         positions.takeLast(2).let { lastTwoPositions ->
@@ -110,6 +122,11 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
             MotionEvent.ACTION_DOWN -> {
                 val canvasX = (event.x - width / 2f - translationX) / scaleFactor
                 val canvasY = (event.y - height / 2f - translationY) / scaleFactor
+                if (isInformationBoxClicked(event.x,event.y)){
+                    listener?.onInformationOverviewClicked()
+                    return true
+                }
+
                 collisionAvoidanceCircleAndAvoidedCollisions.forEach {
                     if (isCollisionAvoidanceClicked(canvasX, canvasY, it.first)) {
                         listener?.onCollisionAvoidanceClicked(it.second)
@@ -194,7 +211,11 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
         mowerMatrix.postRotate(rotation, halfWidth, halfHeight)
         mowerMatrix.postTranslate(x - halfWidth, y - halfHeight)
 
-        canvas.drawBitmap(scaledMowerBitmap, mowerMatrix, null) // null can be replaced with a custom Paint object if needed
+        canvas.drawBitmap(
+            scaledMowerBitmap,
+            mowerMatrix,
+            null
+        ) // null can be replaced with a custom Paint object if needed
     }
 
     // Calculate the angle between two positions
@@ -240,5 +261,9 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
                 && y >= collisionAvoidanceCircle.y - circlePadding
                 && y <= collisionAvoidanceCircle.y + circlePadding
                 )
+    }
+
+    private fun isInformationBoxClicked(x: Float, y: Float) : Boolean{
+        return (x >= (width-100)  && y <= 100)
     }
 }
