@@ -14,6 +14,7 @@ import se.ju.student.robomow.model.AvoidedCollisions
 import se.ju.student.robomow.model.Position
 import se.ju.student.robomow.ui.constants.MapConstants
 import se.ju.student.robomow.ui.constants.MapConstants.collisionPaint
+import se.ju.student.robomow.ui.constants.MapConstants.mowerImagePaint
 import se.ju.student.robomow.ui.view.utils.MapUtils
 import kotlin.math.min
 import kotlin.math.max
@@ -57,6 +58,16 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
     )
     private val mowerMatrix = Matrix()
 
+    private val mapOverViewIcon: Bitmap =
+        BitmapFactory.decodeResource(resources, R.drawable.map_overview_icon)
+    private val scaledMapOverViewIcon: Bitmap = Bitmap.createScaledBitmap(
+        mapOverViewIcon,
+        (mapOverViewIcon.width * 0.06).toInt(), // Scale the width down from the original width
+        (mapOverViewIcon.height * 0.06).toInt(), // Scale the height down from the original height
+        true
+    )
+
+
     interface CollisionAvoidanceListener {
         fun onCollisionAvoidanceClicked(collision: AvoidedCollisions)
         fun onInformationOverviewClicked()
@@ -78,13 +89,7 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
             height / 2f,
             paint
         )
-        canvas.drawRect(
-            centeredWidth - 50,
-            -centeredHeight,
-            centeredWidth,
-            -centeredHeight + 59,
-            collisionPaint
-        )
+        canvas.drawBitmap(scaledMapOverViewIcon, centeredWidth - 100, -centeredHeight, mowerImagePaint)
         canvas.translate(translationX, translationY)
         canvas.scale(scaleFactor, scaleFactor)
         //canvas.drawRect((w-500),h,w,h+500 ,Paint().apply { Color.WHITE })
@@ -122,7 +127,7 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
             MotionEvent.ACTION_DOWN -> {
                 val canvasX = (event.x - width / 2f - translationX) / scaleFactor
                 val canvasY = (event.y - height / 2f - translationY) / scaleFactor
-                if (isInformationBoxClicked(event.x,event.y)){
+                if (isInformationBoxClicked(event.x, event.y)) {
                     listener?.onInformationOverviewClicked()
                     return true
                 }
@@ -263,7 +268,7 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
                 )
     }
 
-    private fun isInformationBoxClicked(x: Float, y: Float) : Boolean{
-        return (x >= (width-100)  && y <= 100)
+    private fun isInformationBoxClicked(x: Float, y: Float): Boolean {
+        return (x >= (width - 100) && y <= 100)
     }
 }
