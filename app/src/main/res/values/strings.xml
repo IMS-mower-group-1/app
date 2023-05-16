@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">RoboMow</string>
     <string name="connect">Connect</string>
+    <string name="control">Control</string>
+    <string name="routes">Routes</string>
+    <string name="startSession">Start session</string>
+    <string name="endSession">End session</string>
     <string name="avoided_collisions">Avoided Collisions: %d.</string>
     <string name="mowing_time">Mowing Time: %dh %dm.</string>
     <string name="mowing_status">Status: %1$s.</string>
@@ -13,4 +17,7 @@
     <string name="has_shown_map_overview_key">se.ju.student.robomow.HAS_SHOWN_MAP_OVERVIEW</string>
     <string name="do_not_show_this_again">Don\'t show this again.</string>
     <string name="close">Close</string>
+    <string name="automatic">Automatic</string>
+    <string name="previouslyPairedDevices">Previously Paired Devices</string>
+    <string name="newDevices">New devices</string>
 </resources>
