@@ -14,7 +14,9 @@ import se.ju.student.robomow.model.AvoidedCollisions
 import se.ju.student.robomow.model.Position
 import se.ju.student.robomow.ui.constants.MapConstants
 import se.ju.student.robomow.ui.constants.MapConstants.collisionPaint
+import se.ju.student.robomow.ui.constants.MapConstants.collisionTextPaint
 import se.ju.student.robomow.ui.constants.MapConstants.mowerImagePaint
+import se.ju.student.robomow.ui.constants.MapConstants.startTextPaint
 import se.ju.student.robomow.ui.view.utils.MapUtils
 import kotlin.math.min
 import kotlin.math.max
@@ -108,6 +110,17 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
         canvas.drawPath(path, MapConstants.pathPaint)
         collisionAvoidanceCircleAndAvoidedCollisions.forEach {
             canvas.drawCircle(it.first.x, it.first.y, it.first.radius, collisionPaint)
+            var text = it.first.avoidedObject
+
+            if (text.length > 6) {
+                val line1 = text.substring(0, 6)
+                val line2 = if (text.length > 11) text.substring(6, 11) + ".." else text.substring(6)
+
+                canvas.drawText(line1, it.first.x, it.first.y - it.first.radius/3, collisionTextPaint)
+                canvas.drawText(line2, it.first.x, it.first.y + it.first.radius/3 + (collisionTextPaint.textSize / 3), collisionTextPaint)
+            } else {
+                canvas.drawText(text, it.first.x, it.first.y + (collisionTextPaint.textSize / 3), collisionTextPaint)
+            }
         }
 
         // Draw the start position
@@ -247,7 +260,8 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
                     Pair(
                         CollisionAvoidanceCircle(
                             canvasX,
-                            canvasY
+                            canvasY,
+                            avoidedCollision.avoidedObject
                         ), avoidedCollision
                     )
                 )
@@ -260,7 +274,7 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
         y: Float,
         collisionAvoidanceCircle: CollisionAvoidanceCircle
     ): Boolean {
-        val circlePadding = 50
+        val circlePadding = 55
         return (x >= collisionAvoidanceCircle.x - circlePadding
                 && x <= collisionAvoidanceCircle.x + circlePadding
                 && y >= collisionAvoidanceCircle.y - circlePadding

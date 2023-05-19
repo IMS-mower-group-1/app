@@ -3,5 +3,6 @@ package se.ju.student.robomow.data
 data class CollisionAvoidanceCircle(
     val x: Float,
     val y: Float,
-    val radius:Float = 20f
+    val avoidedObject: String,
+    val radius:Float = 25f
 )
