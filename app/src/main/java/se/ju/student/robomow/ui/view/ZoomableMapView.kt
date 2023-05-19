@@ -116,8 +116,8 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
                 val line1 = text.substring(0, 6)
                 val line2 = if (text.length > 11) text.substring(6, 11) + ".." else text.substring(6)
 
-                canvas.drawText(line1, it.first.x, it.first.y - it.first.radius/3, collisionTextPaint)
-                canvas.drawText(line2, it.first.x, it.first.y + it.first.radius/3 + (collisionTextPaint.textSize / 3), collisionTextPaint)
+                canvas.drawText(line1, it.first.x, it.first.y - it.first.radius/2.5f + (collisionTextPaint.textSize / 3), collisionTextPaint)
+                canvas.drawText(line2, it.first.x, it.first.y + it.first.radius/2.5f + (collisionTextPaint.textSize / 3), collisionTextPaint)
             } else {
                 canvas.drawText(text, it.first.x, it.first.y + (collisionTextPaint.textSize / 3), collisionTextPaint)
             }
