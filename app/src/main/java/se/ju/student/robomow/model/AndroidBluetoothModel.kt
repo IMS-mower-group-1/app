@@ -33,21 +33,20 @@ class AndroidBluetoothModel(
     override val previouslyPairedDevices: LiveData<Set<BluetoothDevice>>
         get() = _previouslyPairedDevices
 
-    var isDeviceFoundReceiverRegistered = false
-
     init {
         getPreviouslyPairedDevices()
     }
 
     override fun startDiscovery() {
-        if (!hasRequiredPermission(Manifest.permission.BLUETOOTH_SCAN)){
+        if (!hasRequiredPermission(Manifest.permission.BLUETOOTH_SCAN)
+            && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+        ) {
             return
         }
         context.registerReceiver(
             deviceFoundReceiver,
             IntentFilter(BluetoothDevice.ACTION_FOUND)
         )
-        isDeviceFoundReceiverRegistered = true
         bluetoothAdapter?.startDiscovery()
     }
 
