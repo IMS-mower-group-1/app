@@ -22,7 +22,8 @@ class DeviceListViewModel @Inject constructor(
         bluetoothModel.cancelDiscovery()
     }
 
-    fun unregisterReceiver() {
+    override fun onCleared() {
+        super.onCleared()
         bluetoothModel.unregisterReceiver()
     }
 }

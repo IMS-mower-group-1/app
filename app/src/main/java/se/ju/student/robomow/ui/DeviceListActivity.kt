@@ -184,8 +184,4 @@ class DeviceListActivity : AppCompatActivity() {
         deviceListViewModel.startDiscovery()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        deviceListViewModel.unregisterReceiver()
-    }
 }
