@@ -1,5 +1,6 @@
 package se.ju.student.robomow.model
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
@@ -32,15 +33,21 @@ class AndroidBluetoothModel(
     override val previouslyPairedDevices: LiveData<Set<BluetoothDevice>>
         get() = _previouslyPairedDevices
 
+    var isDeviceFoundReceiverRegistered = false
+
     init {
         getPreviouslyPairedDevices()
     }
 
     override fun startDiscovery() {
+        if (!hasRequiredPermission(Manifest.permission.BLUETOOTH_SCAN)){
+            return
+        }
         context.registerReceiver(
             deviceFoundReceiver,
             IntentFilter(BluetoothDevice.ACTION_FOUND)
         )
+        isDeviceFoundReceiverRegistered = true
         bluetoothAdapter?.startDiscovery()
     }
 
@@ -60,7 +67,7 @@ class AndroidBluetoothModel(
         }
     }
 
-    private fun hasRequiredPermissions(permission: String): Boolean {
+    private fun hasRequiredPermission(permission: String): Boolean {
         return context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
     }
 

@@ -24,6 +24,10 @@ class DeviceListViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        bluetoothModel.unregisterReceiver()
+        try {
+            bluetoothModel.unregisterReceiver()
+        } catch (e: IllegalArgumentException) {
+            e.printStackTrace()
+        }
     }
 }
