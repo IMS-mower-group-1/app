@@ -12,6 +12,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import se.ju.student.robomow.R
 import se.ju.student.robomow.domain.BluetoothModel
 
 @SuppressLint("MissingPermission")
@@ -41,6 +42,9 @@ class AndroidBluetoothModel(
         if (!hasPermission(Manifest.permission.BLUETOOTH_SCAN)
             && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
         ) {
+            Intent(context.getString(R.string.missing_permission_filter)).also {
+                context.sendBroadcast(it)
+            }
             return
         }
         context.registerReceiver(
@@ -62,6 +66,9 @@ class AndroidBluetoothModel(
         if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)
             && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
         ) {
+            Intent(context.getString(R.string.missing_permission_filter)).also {
+                context.sendBroadcast(it)
+            }
             return
         }
         _previouslyPairedDevices.value = bluetoothAdapter?.bondedDevices

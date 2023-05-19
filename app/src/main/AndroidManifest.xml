@@ -66,6 +66,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <receiver android:name=".ui.PermissionBroadcastReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="se.ju.student.robomow.PERMISSION_MISSING" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
