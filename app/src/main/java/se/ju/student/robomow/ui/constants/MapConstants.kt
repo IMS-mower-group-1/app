@@ -42,7 +42,7 @@ object MapConstants {
     }
     val collisionPaint = Paint().apply {
         color = Color.RED
-        style = Paint.Style.STROKE
+        style = Paint.Style.FILL_AND_STROKE
         strokeWidth = BORDER_STROKE_WIDTH
     }
 }

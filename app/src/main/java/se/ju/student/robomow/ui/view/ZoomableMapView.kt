@@ -260,7 +260,7 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
         y: Float,
         collisionAvoidanceCircle: CollisionAvoidanceCircle
     ): Boolean {
-        val circlePadding = 30
+        val circlePadding = 50
         return (x >= collisionAvoidanceCircle.x - circlePadding
                 && x <= collisionAvoidanceCircle.x + circlePadding
                 && y >= collisionAvoidanceCircle.y - circlePadding
