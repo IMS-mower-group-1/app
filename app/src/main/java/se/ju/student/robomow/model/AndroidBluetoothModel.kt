@@ -38,7 +38,7 @@ class AndroidBluetoothModel(
     }
 
     override fun startDiscovery() {
-        if (!hasRequiredPermission(Manifest.permission.BLUETOOTH_SCAN)
+        if (!hasPermission(Manifest.permission.BLUETOOTH_SCAN)
             && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
         ) {
             return
@@ -59,14 +59,15 @@ class AndroidBluetoothModel(
     }
 
     private fun getPreviouslyPairedDevices() {
-        try {
-            _previouslyPairedDevices.value = bluetoothAdapter?.bondedDevices
-        } catch (e: SecurityException) {
-            // TODO: Handle Exception
+        if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)
+            && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+        ) {
+            return
         }
+        _previouslyPairedDevices.value = bluetoothAdapter?.bondedDevices
     }
 
-    private fun hasRequiredPermission(permission: String): Boolean {
+    private fun hasPermission(permission: String): Boolean {
         return context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
     }
 
