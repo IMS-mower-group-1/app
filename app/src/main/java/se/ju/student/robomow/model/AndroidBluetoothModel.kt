@@ -39,9 +39,7 @@ class AndroidBluetoothModel(
     }
 
     override fun startDiscovery() {
-        if (!hasPermission(Manifest.permission.BLUETOOTH_SCAN)
-            && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-        ) {
+        if (!hasBluetoothDiscoveryPermissions()){
             Intent(context.getString(R.string.missing_permission_filter)).also {
                 context.sendBroadcast(it)
             }
@@ -52,6 +50,17 @@ class AndroidBluetoothModel(
             IntentFilter(BluetoothDevice.ACTION_FOUND)
         )
         bluetoothAdapter?.startDiscovery()
+    }
+    private fun hasBluetoothDiscoveryPermissions(): Boolean {
+        if (!hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)){
+            return false
+        }
+        if (!hasPermission(Manifest.permission.BLUETOOTH_SCAN)
+            && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+        ) {
+            return false
+        }
+        return true
     }
 
     override fun cancelDiscovery() {
@@ -75,6 +84,7 @@ class AndroidBluetoothModel(
     }
 
     private fun hasPermission(permission: String): Boolean {
+        val test = context.checkSelfPermission(permission)
         return context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
     }
 

@@ -49,6 +49,8 @@ class DeviceListActivity : AppCompatActivity(), PermissionCallback {
         setContentView(R.layout.activity_device_list)
         deviceListViewModel = ViewModelProvider(this)[DeviceListViewModel::class.java]
 
+        val permissions = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION)
+        ActivityCompat.requestPermissions(this, permissions, 0)
         registerPermissionReceiver()
 
         val pairedDevicesListView = findViewById<ListView>(R.id.paired_devices_list_view)
