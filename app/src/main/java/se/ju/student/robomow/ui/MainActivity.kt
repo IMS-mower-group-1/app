@@ -7,14 +7,14 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
+import android.view.View
+import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import dagger.hilt.android.AndroidEntryPoint
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.Disposable
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import se.ju.student.robomow.BluetoothClient
@@ -34,21 +34,28 @@ class MainActivity : AppCompatActivity() {
     private lateinit var connectionStatusText: TextView
     private lateinit var connectButton: Button
 
+    private lateinit var startSessionButton: Button
+    private lateinit var endSessionButton: Button
+
+    private lateinit var progressBar: ProgressBar
+
+    private var subscription: Disposable? = null
+
     private fun handleBluetoothConnectionLost() {
         connectButton.setBackgroundColor(ContextCompat.getColor(this, R.color.blue_dark))
-        connectButton.text = "Connect"
+        connectButton.text = getString(R.string.connect_button_when_not_connected)
 
         connectionStatusImage.setImageAlpha(51) // Set opacity to 20%
-        connectionStatusText.text = "Disconnected"
+        connectionStatusText.text = getString(R.string.connection_status_when_disconnected)
         connectionStatusText.setTextColor(ContextCompat.getColor(this, R.color.warning_red))
     }
 
     private fun handleBluetoothConnectionEstablished() {
         connectButton.setBackgroundColor(ContextCompat.getColor(this, R.color.warning_red))
-        connectButton.text = "Disconnect"
+        connectButton.text = getString(R.string.connect_button_when_connected)
 
         connectionStatusImage.setImageAlpha(255) // Set opacity to 100%
-        connectionStatusText.text = "Connected"
+        connectionStatusText.text = getString(R.string.connection_status_when_connected)
         connectionStatusText.setTextColor(ContextCompat.getColor(this, R.color.success_green))
     }
 
@@ -67,6 +74,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        progressBar = findViewById(R.id.progress_indicator)
+
         connectionStatusImage = findViewById(R.id.connection_status_image)
         connectionStatusText = findViewById(R.id.connection_status_text)
         connectButton = findViewById(R.id.connect_button)
@@ -79,7 +88,7 @@ class MainActivity : AppCompatActivity() {
         requestPermission()
 
         connectButton.setOnClickListener {
-            if(connectButton.text == "Connect"){
+            if(connectButton.text == getString(R.string.connect_button_when_not_connected)){
                 Intent(this, DeviceListActivity::class.java).also {
                     startActivity(it)
                 }
@@ -108,23 +117,71 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val startSessionButton = findViewById<Button>(R.id.start_session_button)
+        startSessionButton = findViewById<Button>(R.id.start_session_button)
         startSessionButton.setOnClickListener {
             if (bluetoothClient == null) {
                 Toast.makeText(this, "Connect to a mower to start its session", Toast.LENGTH_SHORT).show()
             } else {
+                disableSessionButtons()
+                progressBar.visibility = View.VISIBLE
                 bluetoothClient!!.sendMessage("START_SESSION")
+                subscription = bluetoothClient!!.getSharedBuffer()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe { message ->
+                        // This will be called every time a new message is added to the buffer
+                        Log.d("pulsePi4", "Received: $message")
+                        if(message == "Success"){
+                            enableSessionButtons()
+                            progressBar.visibility = View.GONE
+                            Toast.makeText(this, "Session started", Toast.LENGTH_SHORT).show()
+                            subscription?.dispose()
+                        } else if(message == "Failure"){
+                            enableSessionButtons()
+                            progressBar.visibility = View.GONE
+                            Toast.makeText(this, "Failed to start session", Toast.LENGTH_SHORT).show()
+                            subscription?.dispose()
+                        }
+                    }
             }
         }
 
-        val endSessionButton = findViewById<Button>(R.id.end_session_button)
+        endSessionButton = findViewById<Button>(R.id.end_session_button)
         endSessionButton.setOnClickListener {
             if (bluetoothClient == null) {
                 Toast.makeText(this, "Connect to a mower to end its session", Toast.LENGTH_SHORT).show()
             } else {
+                disableSessionButtons()
+                progressBar.visibility = View.VISIBLE
                 bluetoothClient!!.sendMessage("END_SESSION")
+                subscription = bluetoothClient!!.getSharedBuffer()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe { message ->
+                        // This will be called every time a new message is added to the buffer
+                        Log.d("pulsePi4", "Received: $message")
+                        if(message == "Success"){
+                            enableSessionButtons()
+                            progressBar.visibility = View.GONE
+                            Toast.makeText(this, "Session ended", Toast.LENGTH_SHORT).show()
+                            subscription?.dispose()
+                        } else if(message == "Failure"){
+                            enableSessionButtons()
+                            progressBar.visibility = View.GONE
+                            Toast.makeText(this, "Failed to end session", Toast.LENGTH_SHORT).show()
+                            subscription?.dispose()
+                        }
+                    }
             }
         }
+    }
+
+    private fun disableSessionButtons(){
+        startSessionButton.isEnabled = false
+        endSessionButton.isEnabled = false
+    }
+
+    private fun enableSessionButtons(){
+        startSessionButton.isEnabled = true
+        endSessionButton.isEnabled = true
     }
 
     private fun requestPermission() {
@@ -156,4 +213,11 @@ class MainActivity : AppCompatActivity() {
                 Log.d("test006", "${it.key} = ${it.value}")
             }
         }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        // Dispose of ongoing subscriptions
+        subscription?.dispose()
+    }
 }
