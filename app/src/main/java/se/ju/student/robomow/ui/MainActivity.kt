@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.onEach
 import se.ju.student.robomow.BluetoothClient
 import se.ju.student.robomow.BluetoothClientHolder
 import se.ju.student.robomow.R
-import io.reactivex.rxjava3.subjects.PublishSubject
 import se.ju.student.robomow.api.RoboMowApi
 import javax.inject.Inject
 
@@ -44,19 +43,19 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleBluetoothConnectionLost() {
         connectButton.setBackgroundColor(ContextCompat.getColor(this, R.color.blue_dark))
-        connectButton.text = "Connect"
+        connectButton.text = getString(R.string.connect_button_when_not_connected)
 
         connectionStatusImage.setImageAlpha(51) // Set opacity to 20%
-        connectionStatusText.text = "Disconnected"
+        connectionStatusText.text = getString(R.string.connection_status_when_disconnected)
         connectionStatusText.setTextColor(ContextCompat.getColor(this, R.color.warning_red))
     }
 
     private fun handleBluetoothConnectionEstablished() {
         connectButton.setBackgroundColor(ContextCompat.getColor(this, R.color.warning_red))
-        connectButton.text = "Disconnect"
+        connectButton.text = getString(R.string.connect_button_when_connected)
 
         connectionStatusImage.setImageAlpha(255) // Set opacity to 100%
-        connectionStatusText.text = "Connected"
+        connectionStatusText.text = getString(R.string.connection_status_when_connected)
         connectionStatusText.setTextColor(ContextCompat.getColor(this, R.color.success_green))
     }
 
@@ -89,7 +88,7 @@ class MainActivity : AppCompatActivity() {
         requestPermission()
 
         connectButton.setOnClickListener {
-            if(connectButton.text == "Connect"){
+            if(connectButton.text == getString(R.string.connect_button_when_not_connected)){
                 Intent(this, DeviceListActivity::class.java).also {
                     startActivity(it)
                 }

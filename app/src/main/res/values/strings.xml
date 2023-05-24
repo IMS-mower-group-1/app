@@ -20,4 +20,8 @@
     <string name="automatic">Automatic</string>
     <string name="previouslyPairedDevices">Previously Paired Devices</string>
     <string name="newDevices">New devices</string>
+    <string name="connect_button_when_not_connected">Connect</string>
+    <string name="connection_status_when_disconnected">Disconnected</string>
+    <string name="connect_button_when_connected">Disconnect</string>
+    <string name="connection_status_when_connected">Connected</string>
 </resources>
