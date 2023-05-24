@@ -51,7 +51,7 @@ class AndroidBluetoothModel(
         bluetoothAdapter?.startDiscovery()
     }
     private fun hasBluetoothDiscoveryPermissions(): Boolean {
-        if (!hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)){
+        if (!hasPermission(Manifest.permission.ACCESS_FINE_LOCATION) && Build.VERSION.SDK_INT < Build.VERSION_CODES.S){
             return false
         }
         if (!hasPermission(Manifest.permission.BLUETOOTH_SCAN)

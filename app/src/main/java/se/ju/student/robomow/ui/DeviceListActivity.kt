@@ -233,8 +233,10 @@ class DeviceListActivity : AppCompatActivity(), PermissionCallback {
 
     override fun onStart() {
         super.onStart()
-        val permissions = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION)
-        ActivityCompat.requestPermissions(this, permissions, 0)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S){
+            val permissions = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION)
+            ActivityCompat.requestPermissions(this, permissions, 0)
+        }
     }
 
     override fun onDestroy() {
