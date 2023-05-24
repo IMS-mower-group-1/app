@@ -1,6 +1,8 @@
 package se.ju.student.robomow.model
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.content.BroadcastReceiver
@@ -11,6 +13,8 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.flow.MutableStateFlow
+import se.ju.student.robomow.R
 import se.ju.student.robomow.domain.BluetoothModel
 
 @SuppressLint("MissingPermission")
@@ -32,18 +36,25 @@ class AndroidBluetoothModel(
     override val previouslyPairedDevices: LiveData<Set<BluetoothDevice>>
         get() = _previouslyPairedDevices
 
+    private val _isDiscovering = MutableLiveData(false)
+    override val isDiscovering: LiveData<Boolean> get() = _isDiscovering
+
     init {
         getPreviouslyPairedDevices()
     }
 
     override fun startDiscovery() {
-        context.registerReceiver(
-            deviceFoundReceiver,
-            IntentFilter(BluetoothDevice.ACTION_FOUND)
-        )
+        if (!hasBluetoothDiscoveryPermissions()){
+            Intent(context.getString(R.string.missing_permission_filter)).also {
+                context.sendBroadcast(it)
+            }
+            return
+        }
+        if (bluetoothAdapter?.isDiscovering == true) {
+            return
+        }
         bluetoothAdapter?.startDiscovery()
     }
-
     override fun cancelDiscovery() {
         bluetoothAdapter?.cancelDiscovery()
     }
@@ -52,16 +63,42 @@ class AndroidBluetoothModel(
         context.unregisterReceiver(deviceFoundReceiver)
     }
 
-    private fun getPreviouslyPairedDevices() {
-        try {
-            _previouslyPairedDevices.value = bluetoothAdapter?.bondedDevices
-        } catch (e: SecurityException) {
-            // TODO: Handle Exception
-        }
+    override fun registerReceiver() {
+        context.registerReceiver(
+            deviceFoundReceiver,
+            IntentFilter(BluetoothDevice.ACTION_FOUND).also {
+                it.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
+                it.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
+            }
+        )
     }
 
-    private fun hasRequiredPermissions(permission: String): Boolean {
+    private fun getPreviouslyPairedDevices() {
+        if (!hasPermission(Manifest.permission.BLUETOOTH_CONNECT)
+            && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+        ) {
+            Intent(context.getString(R.string.missing_permission_filter)).also {
+                context.sendBroadcast(it)
+            }
+            return
+        }
+        _previouslyPairedDevices.value = bluetoothAdapter?.bondedDevices
+    }
+
+    private fun hasPermission(permission: String): Boolean {
         return context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun hasBluetoothDiscoveryPermissions(): Boolean {
+        if (!hasPermission(Manifest.permission.ACCESS_FINE_LOCATION) && Build.VERSION.SDK_INT < Build.VERSION_CODES.S){
+            return false
+        }
+        if (!hasPermission(Manifest.permission.BLUETOOTH_SCAN)
+            && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+        ) {
+            return false
+        }
+        return true
     }
 
     private val deviceFoundReceiver = object : BroadcastReceiver() {
@@ -78,6 +115,12 @@ class AndroidBluetoothModel(
                     if (device is BluetoothDevice) {
                         _newDevices.value = _newDevices.value.orEmpty().plus(device)
                     }
+                }
+                BluetoothAdapter.ACTION_DISCOVERY_STARTED -> {
+                    _isDiscovering.value = true
+                }
+                BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
+                    _isDiscovering.value = false
                 }
             }
         }
