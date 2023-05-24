@@ -58,6 +58,10 @@ class DeviceListActivity : AppCompatActivity(), PermissionCallback {
 
         val pairedDevicesArrayAdapter = BluetoothDeviceListAdapter(this)
         val newDevicesArrayAdapter = BluetoothDeviceListAdapter(this)
+        val scanButton = findViewById<Button>(R.id.scan_button)
+        scanButton.setOnClickListener {
+            deviceListViewModel.startDiscovery()
+        }
 
         pairedDevicesListView.adapter = pairedDevicesArrayAdapter
         newDevicesListView.adapter = newDevicesArrayAdapter
@@ -205,7 +209,8 @@ class DeviceListActivity : AppCompatActivity(), PermissionCallback {
     }
 
     override fun onPermissionMissing() {
-        val positiveButtonLabel = getString(R.string.alert_dialog_bluetooth_permissions_positive_button)
+        val positiveButtonLabel =
+            getString(R.string.alert_dialog_bluetooth_permissions_positive_button)
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.alert_dialog_bluetooth_permissions_title)
             .setMessage(
@@ -231,10 +236,4 @@ class DeviceListActivity : AppCompatActivity(), PermissionCallback {
         super.onDestroy()
         unregisterReceiver(permissionReceiver)
     }
-
-    override fun onStart() {
-        super.onStart()
-        deviceListViewModel.startDiscovery()
-    }
-
 }

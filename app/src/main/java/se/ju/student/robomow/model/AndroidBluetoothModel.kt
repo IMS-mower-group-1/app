@@ -45,6 +45,9 @@ class AndroidBluetoothModel(
             }
             return
         }
+        if (bluetoothAdapter?.isDiscovering == true) {
+            return
+        }
         context.registerReceiver(
             deviceFoundReceiver,
             IntentFilter(BluetoothDevice.ACTION_FOUND)
@@ -84,7 +87,6 @@ class AndroidBluetoothModel(
     }
 
     private fun hasPermission(permission: String): Boolean {
-        val test = context.checkSelfPermission(permission)
         return context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
     }
 
