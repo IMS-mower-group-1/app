@@ -14,11 +14,17 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import android.app.ProgressDialog
+import android.net.Uri
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.view.View
 import android.widget.*
 import androidx.core.app.ActivityCompat
+import androidx.fragment.app.DialogFragment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
+import dagger.Provides
 import dagger.hilt.android.AndroidEntryPoint
 import se.ju.student.robomow.BluetoothClient
 import se.ju.student.robomow.BluetoothClientHolder
@@ -29,26 +35,43 @@ import se.ju.student.robomow.ui.viewmodel.DeviceListViewModel
 
 @SuppressLint("MissingPermission")
 @AndroidEntryPoint
-class DeviceListActivity : AppCompatActivity() {
+class DeviceListActivity : AppCompatActivity(), PermissionCallback {
 
     private lateinit var deviceListViewModel: DeviceListViewModel
+    private lateinit var permissionReceiver: PermissionBroadcastReceiver
     private val mainScope = CoroutineScope(Dispatchers.Main)
 
     // Add a progress dialog to show during the pairing process
     private lateinit var progressBar: ProgressBar
+    private lateinit var discoveryProgressBar: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_device_list)
         deviceListViewModel = ViewModelProvider(this)[DeviceListViewModel::class.java]
-        val permissions = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION)
-        ActivityCompat.requestPermissions(this, permissions, 0)
+
+        registerPermissionReceiver()
 
         val pairedDevicesListView = findViewById<ListView>(R.id.paired_devices_list_view)
         val newDevicesListView = findViewById<ListView>(R.id.new_devices_list_view)
 
         val pairedDevicesArrayAdapter = BluetoothDeviceListAdapter(this)
         val newDevicesArrayAdapter = BluetoothDeviceListAdapter(this)
+        deviceListViewModel.registerReceiver()
+        val scanButton = findViewById<Button>(R.id.scan_button)
+        scanButton.setOnClickListener {
+            deviceListViewModel.startDiscovery()
+        }
+        discoveryProgressBar = findViewById(R.id.discovery_progress_bar)
+        deviceListViewModel.isDiscovering.observe(this) { isDiscovering ->
+            if (isDiscovering) {
+                discoveryProgressBar.visibility = View.VISIBLE
+                scanButton.isEnabled = false
+            } else {
+                discoveryProgressBar.visibility = View.GONE
+                scanButton.isEnabled = true
+            }
+        }
 
         pairedDevicesListView.adapter = pairedDevicesArrayAdapter
         newDevicesListView.adapter = newDevicesArrayAdapter
@@ -114,13 +137,21 @@ class DeviceListActivity : AppCompatActivity() {
             device,
             onConnected = {
                 progressBar.visibility = View.GONE
-                Toast.makeText(this@DeviceListActivity, "Connected to the device", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@DeviceListActivity,
+                    "Connected to the device",
+                    Toast.LENGTH_SHORT
+                ).show()
                 onConnectionSuccess()
                 BluetoothClientHolder.updateConnectionStatus(true)
             },
             onFailed = {
                 progressBar.visibility = View.GONE
-                Toast.makeText(this@DeviceListActivity, "Failed to connect to the device", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@DeviceListActivity,
+                    "Failed to connect to the device",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         )
         // Assign the new bluetoothClient to the singleton
@@ -179,13 +210,49 @@ class DeviceListActivity : AppCompatActivity() {
         }
     }
 
+    private fun registerPermissionReceiver() {
+        permissionReceiver = PermissionBroadcastReceiver(this)
+        registerReceiver(
+            permissionReceiver,
+            IntentFilter(getString(R.string.missing_permission_filter))
+        )
+    }
+
+    override fun onPermissionMissing() {
+        val positiveButtonLabel =
+            getString(R.string.alert_dialog_bluetooth_permissions_positive_button)
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.alert_dialog_bluetooth_permissions_title)
+            .setMessage(
+                getString(
+                    R.string.alert_dialog_bluetooth_permissions_message,
+                    positiveButtonLabel
+                )
+            )
+            .setPositiveButton(positiveButtonLabel) { _, _ ->
+                val intent = Intent()
+                intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                val uri = Uri.fromParts("package", packageName, null)
+                intent.data = uri
+                startActivity(intent)
+            }
+            .setNeutralButton(R.string.close) { dialog, _ ->
+                dialog.cancel()
+            }
+            .show()
+    }
+
     override fun onStart() {
         super.onStart()
-        deviceListViewModel.startDiscovery()
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            val permissions = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION)
+            ActivityCompat.requestPermissions(this, permissions, 0)
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        unregisterReceiver(permissionReceiver)
         deviceListViewModel.unregisterReceiver()
     }
 }

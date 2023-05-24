@@ -14,6 +14,7 @@ class DeviceListViewModel @Inject constructor(
 
     val newDevices: LiveData<Set<BluetoothDevice>> get() = bluetoothModel.newDevices
     val previouslyPairedDevices: LiveData<Set<BluetoothDevice>> get() = bluetoothModel.previouslyPairedDevices
+    val isDiscovering: LiveData<Boolean> get() = bluetoothModel.isDiscovering
     fun startDiscovery() {
         bluetoothModel.startDiscovery()
     }
@@ -23,6 +24,14 @@ class DeviceListViewModel @Inject constructor(
     }
 
     fun unregisterReceiver() {
-        bluetoothModel.unregisterReceiver()
+        try {
+            bluetoothModel.unregisterReceiver()
+        } catch (e: IllegalArgumentException) {
+            e.printStackTrace()
+        }
+    }
+
+    fun registerReceiver() {
+        bluetoothModel.registerReceiver()
     }
 }

@@ -15,9 +15,14 @@
     <string name="start_color_explanation">The start of the mowing session.</string>
     <string name="map_view_information">Map Overview</string>
     <string name="has_shown_map_overview_key">se.ju.student.robomow.HAS_SHOWN_MAP_OVERVIEW</string>
+    <string name="missing_permission_filter">se.ju.student.robomow.PERMISSION_MISSING</string>
     <string name="do_not_show_this_again">Don\'t show this again.</string>
     <string name="close">Close</string>
     <string name="automatic">Automatic</string>
     <string name="previouslyPairedDevices">Previously Paired Devices</string>
     <string name="newDevices">New devices</string>
+    <string name="alert_dialog_bluetooth_permissions_message">To use this feature, we need your permission to access Bluetooth functionality. Granting these permissions will allow us to search for nearby devices and provide you with the best experience. Please enable Bluetooth permissions to continue.\n\nTo change permissions, click on the %s button below.</string>
+    <string name="alert_dialog_bluetooth_permissions_title">Bluetooth Permissions</string>
+    <string name="alert_dialog_bluetooth_permissions_positive_button">Open Settings</string>
+    <string name="scan">Scan</string>
 </resources>
