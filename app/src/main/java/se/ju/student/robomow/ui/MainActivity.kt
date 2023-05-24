@@ -132,16 +132,10 @@ class MainActivity : AppCompatActivity() {
             requestMultiplePermissions.launch(
                 arrayOf(
                     android.Manifest.permission.BLUETOOTH_SCAN,
-                    android.Manifest.permission.BLUETOOTH_CONNECT,
-                    android.Manifest.permission.ACCESS_FINE_LOCATION
+                    android.Manifest.permission.BLUETOOTH_CONNECT
                 )
             )
         } else {
-            requestMultiplePermissions.launch(
-                arrayOf(
-                    android.Manifest.permission.ACCESS_FINE_LOCATION
-                )
-            )
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
             requestBluetooth.launch(enableBtIntent)
         }
