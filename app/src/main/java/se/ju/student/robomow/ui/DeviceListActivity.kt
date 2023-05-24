@@ -43,6 +43,7 @@ class DeviceListActivity : AppCompatActivity(), PermissionCallback {
 
     // Add a progress dialog to show during the pairing process
     private lateinit var progressBar: ProgressBar
+    private lateinit var discoveryProgressBar: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +61,14 @@ class DeviceListActivity : AppCompatActivity(), PermissionCallback {
         val scanButton = findViewById<Button>(R.id.scan_button)
         scanButton.setOnClickListener {
             deviceListViewModel.startDiscovery()
+        }
+        discoveryProgressBar = findViewById(R.id.discovery_progress_bar)
+        deviceListViewModel.isDiscovering.observe(this) {
+            if (it) {
+                discoveryProgressBar.visibility = View.VISIBLE
+            } else {
+                discoveryProgressBar.visibility = View.GONE
+            }
         }
 
         pairedDevicesListView.adapter = pairedDevicesArrayAdapter
@@ -233,7 +242,7 @@ class DeviceListActivity : AppCompatActivity(), PermissionCallback {
 
     override fun onStart() {
         super.onStart()
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S){
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             val permissions = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION)
             ActivityCompat.requestPermissions(this, permissions, 0)
         }

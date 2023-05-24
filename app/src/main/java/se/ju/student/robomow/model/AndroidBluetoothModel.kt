@@ -2,6 +2,7 @@ package se.ju.student.robomow.model
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.content.BroadcastReceiver
@@ -12,6 +13,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.flow.MutableStateFlow
 import se.ju.student.robomow.R
 import se.ju.student.robomow.domain.BluetoothModel
 
@@ -33,6 +35,9 @@ class AndroidBluetoothModel(
     private val _previouslyPairedDevices = MutableLiveData<Set<BluetoothDevice>>()
     override val previouslyPairedDevices: LiveData<Set<BluetoothDevice>>
         get() = _previouslyPairedDevices
+
+    private val _isDiscovering = MutableLiveData(false)
+    override val isDiscovering: LiveData<Boolean> get() = _isDiscovering
 
     init {
         getPreviouslyPairedDevices()
@@ -73,7 +78,10 @@ class AndroidBluetoothModel(
     override fun registerReceiver() {
         context.registerReceiver(
             deviceFoundReceiver,
-            IntentFilter(BluetoothDevice.ACTION_FOUND)
+            IntentFilter(BluetoothDevice.ACTION_FOUND).also {
+                it.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
+                it.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
+            }
         )
     }
 
@@ -107,6 +115,12 @@ class AndroidBluetoothModel(
                     if (device is BluetoothDevice) {
                         _newDevices.value = _newDevices.value.orEmpty().plus(device)
                     }
+                }
+                BluetoothAdapter.ACTION_DISCOVERY_STARTED -> {
+                    _isDiscovering.postValue(true)
+                }
+                BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
+                    _isDiscovering.postValue(false)
                 }
             }
         }
