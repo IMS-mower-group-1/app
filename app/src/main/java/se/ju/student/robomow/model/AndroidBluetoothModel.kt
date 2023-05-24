@@ -48,10 +48,6 @@ class AndroidBluetoothModel(
         if (bluetoothAdapter?.isDiscovering == true) {
             return
         }
-        context.registerReceiver(
-            deviceFoundReceiver,
-            IntentFilter(BluetoothDevice.ACTION_FOUND)
-        )
         bluetoothAdapter?.startDiscovery()
     }
     private fun hasBluetoothDiscoveryPermissions(): Boolean {
@@ -72,6 +68,13 @@ class AndroidBluetoothModel(
 
     override fun unregisterReceiver() {
         context.unregisterReceiver(deviceFoundReceiver)
+    }
+
+    override fun registerReceiver() {
+        context.registerReceiver(
+            deviceFoundReceiver,
+            IntentFilter(BluetoothDevice.ACTION_FOUND)
+        )
     }
 
     private fun getPreviouslyPairedDevices() {

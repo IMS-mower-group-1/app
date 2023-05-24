@@ -10,4 +10,5 @@ interface BluetoothModel {
     fun startDiscovery()
     fun cancelDiscovery()
     fun unregisterReceiver()
+    fun registerReceiver()
 }

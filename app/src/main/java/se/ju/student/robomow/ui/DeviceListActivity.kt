@@ -49,8 +49,6 @@ class DeviceListActivity : AppCompatActivity(), PermissionCallback {
         setContentView(R.layout.activity_device_list)
         deviceListViewModel = ViewModelProvider(this)[DeviceListViewModel::class.java]
 
-        val permissions = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION)
-        ActivityCompat.requestPermissions(this, permissions, 0)
         registerPermissionReceiver()
 
         val pairedDevicesListView = findViewById<ListView>(R.id.paired_devices_list_view)
@@ -58,6 +56,7 @@ class DeviceListActivity : AppCompatActivity(), PermissionCallback {
 
         val pairedDevicesArrayAdapter = BluetoothDeviceListAdapter(this)
         val newDevicesArrayAdapter = BluetoothDeviceListAdapter(this)
+        deviceListViewModel.registerReceiver()
         val scanButton = findViewById<Button>(R.id.scan_button)
         scanButton.setOnClickListener {
             deviceListViewModel.startDiscovery()
@@ -232,8 +231,15 @@ class DeviceListActivity : AppCompatActivity(), PermissionCallback {
             .show()
     }
 
+    override fun onStart() {
+        super.onStart()
+        val permissions = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION)
+        ActivityCompat.requestPermissions(this, permissions, 0)
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(permissionReceiver)
+        deviceListViewModel.unregisterReceiver()
     }
 }
