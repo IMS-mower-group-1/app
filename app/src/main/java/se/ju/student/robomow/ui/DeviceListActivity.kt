@@ -66,8 +66,10 @@ class DeviceListActivity : AppCompatActivity(), PermissionCallback {
         deviceListViewModel.isDiscovering.observe(this) {
             if (it) {
                 discoveryProgressBar.visibility = View.VISIBLE
+                scanButton.isEnabled = false
             } else {
                 discoveryProgressBar.visibility = View.GONE
+                scanButton.isEnabled = true
             }
         }
 
