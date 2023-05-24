@@ -184,7 +184,8 @@ class MapView(context: Context, attrs: AttributeSet) : View(context, attrs) {
                     Pair(
                         CollisionAvoidanceCircle(
                             canvasX,
-                            canvasY
+                            canvasY,
+                            avoidedCollision.avoidedObject
                         ), avoidedCollision
                     )
                 )
