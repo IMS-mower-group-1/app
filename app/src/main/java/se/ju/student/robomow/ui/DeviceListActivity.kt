@@ -48,8 +48,6 @@ class DeviceListActivity : AppCompatActivity(), PermissionCallback {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_device_list)
         deviceListViewModel = ViewModelProvider(this)[DeviceListViewModel::class.java]
-        val permissions = arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION)
-        ActivityCompat.requestPermissions(this, permissions, 0)
 
         registerPermissionReceiver()
 
