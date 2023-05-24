@@ -117,10 +117,10 @@ class AndroidBluetoothModel(
                     }
                 }
                 BluetoothAdapter.ACTION_DISCOVERY_STARTED -> {
-                    _isDiscovering.postValue(true)
+                    _isDiscovering.value = true
                 }
                 BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
-                    _isDiscovering.postValue(false)
+                    _isDiscovering.value = false
                 }
             }
         }
