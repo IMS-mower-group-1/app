@@ -55,18 +55,6 @@ class AndroidBluetoothModel(
         }
         bluetoothAdapter?.startDiscovery()
     }
-    private fun hasBluetoothDiscoveryPermissions(): Boolean {
-        if (!hasPermission(Manifest.permission.ACCESS_FINE_LOCATION) && Build.VERSION.SDK_INT < Build.VERSION_CODES.S){
-            return false
-        }
-        if (!hasPermission(Manifest.permission.BLUETOOTH_SCAN)
-            && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-        ) {
-            return false
-        }
-        return true
-    }
-
     override fun cancelDiscovery() {
         bluetoothAdapter?.cancelDiscovery()
     }
@@ -99,6 +87,18 @@ class AndroidBluetoothModel(
 
     private fun hasPermission(permission: String): Boolean {
         return context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun hasBluetoothDiscoveryPermissions(): Boolean {
+        if (!hasPermission(Manifest.permission.ACCESS_FINE_LOCATION) && Build.VERSION.SDK_INT < Build.VERSION_CODES.S){
+            return false
+        }
+        if (!hasPermission(Manifest.permission.BLUETOOTH_SCAN)
+            && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+        ) {
+            return false
+        }
+        return true
     }
 
     private val deviceFoundReceiver = object : BroadcastReceiver() {
