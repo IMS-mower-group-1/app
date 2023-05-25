@@ -17,6 +17,7 @@ import se.ju.student.robomow.R
 import se.ju.student.robomow.api.RoboMowApi
 import se.ju.student.robomow.model.AvoidedCollisions
 import se.ju.student.robomow.model.MowSession
+import se.ju.student.robomow.ui.view.CollisionAvoidanceImageFragment
 import se.ju.student.robomow.ui.view.ZoomableMapView
 import javax.inject.Inject
 

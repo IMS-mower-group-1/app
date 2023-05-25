@@ -102,7 +102,7 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
                 val lastPosition = lastTwoPositions[1]
                 val canvasX = (lastPosition.x * scaleConstant)
                 val canvasY = (lastPosition.y * scaleConstant)
-                val rotation = calculateAngle(lastTwoPositions[0], lastTwoPositions[1])
+                val rotation = MapUtils.calculateAngle(lastTwoPositions[0], lastTwoPositions[1])
                 drawMower(canvas, canvasX, canvasY, rotation)
             }
         }
@@ -234,14 +234,6 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
             mowerMatrix,
             null
         ) // null can be replaced with a custom Paint object if needed
-    }
-
-    // Calculate the angle between two positions
-    private fun calculateAngle(start: Position, end: Position): Float {
-        val delta_x = end.x - start.x
-        val delta_y = end.y - start.y
-        val rotation = Math.toDegrees(Math.atan2(delta_y.toDouble(), delta_x.toDouble())).toFloat()
-        return if (rotation < 0) rotation + 360 else rotation
     }
 
     private fun addCollisionAvoidanceCircleAndCollisionAvoidance(

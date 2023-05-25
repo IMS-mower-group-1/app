@@ -3,7 +3,7 @@ package se.ju.student.robomow.api
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
-import se.ju.student.robomow.model.CollisionAvoidanceImage
+import se.ju.student.robomow.data.CollisionAvoidanceImage
 import se.ju.student.robomow.model.MowSession
 
 interface RoboMowApi {
