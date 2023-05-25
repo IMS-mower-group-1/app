@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">RoboMow</string>
+    <string name="app_name">MowMentum</string>
     <string name="connect">Connect</string>
     <string name="control">Control</string>
     <string name="routes">Routes</string>
