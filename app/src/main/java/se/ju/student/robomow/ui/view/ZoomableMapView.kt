@@ -8,6 +8,7 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
+import androidx.appcompat.content.res.AppCompatResources
 import se.ju.student.robomow.R
 import se.ju.student.robomow.data.CollisionAvoidanceCircle
 import se.ju.student.robomow.model.AvoidedCollisions
@@ -16,7 +17,6 @@ import se.ju.student.robomow.ui.constants.MapConstants
 import se.ju.student.robomow.ui.constants.MapConstants.collisionPaint
 import se.ju.student.robomow.ui.constants.MapConstants.collisionTextPaint
 import se.ju.student.robomow.ui.constants.MapConstants.mowerImagePaint
-import se.ju.student.robomow.ui.constants.MapConstants.startTextPaint
 import se.ju.student.robomow.ui.view.utils.MapUtils
 import kotlin.math.min
 import kotlin.math.max
@@ -39,10 +39,10 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
     var listener: CollisionAvoidanceListener? = null
 
     private val grassTexture: BitmapDrawable =
-        context.getDrawable(R.drawable.grass_texture) as BitmapDrawable
+        AppCompatResources.getDrawable(context, R.drawable.grass_texture) as BitmapDrawable
 
     // New paint object with grassTexture as shader
-    val paint = Paint().apply {
+    private val grassTexturePaint = Paint().apply {
         shader = BitmapShader(
             grassTexture.bitmap,
             Shader.TileMode.REPEAT,
@@ -89,7 +89,7 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
             -height / 2f,
             width / 2f,
             height / 2f,
-            paint
+            grassTexturePaint
         )
         canvas.drawBitmap(scaledMapOverViewIcon, centeredWidth - 100, -centeredHeight, mowerImagePaint)
         canvas.translate(translationX, translationY)
@@ -110,7 +110,7 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
         canvas.drawPath(path, MapConstants.pathPaint)
         collisionAvoidanceCircleAndAvoidedCollisions.forEach {
             canvas.drawCircle(it.first.x, it.first.y, it.first.radius, collisionPaint)
-            var text = it.first.avoidedObject
+            val text = it.first.avoidedObject
 
             if (text.length > 6) {
                 val line1 = text.substring(0, 6)
@@ -247,7 +247,6 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
             val pos = Position(x, -y)
             val avoidedCollision = avoidedCollisions.find { it.position == pos }
             avoidedCollision?.let {
-                avoidedCollision
                 collisionAvoidanceCircleAndAvoidedCollisions.add(
                     Pair(
                         CollisionAvoidanceCircle(
