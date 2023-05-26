@@ -4,7 +4,7 @@ import android.graphics.Canvas
 import se.ju.student.robomow.model.Position
 import se.ju.student.robomow.ui.constants.MapConstants
 
-import java.lang.Float.min
+import kotlin.math.atan2
 
 object MapUtils {
 
@@ -21,9 +21,9 @@ object MapUtils {
 
     // Calculate the angle between two positions
     fun calculateAngle(start: Position, end: Position): Float {
-        val delta_x = end.x - start.x
-        val delta_y = end.y - start.y
-        val rotation = Math.toDegrees(Math.atan2(delta_y.toDouble(), delta_x.toDouble())).toFloat()
+        val deltaX = end.x - start.x
+        val deltaY = end.y - start.y
+        val rotation = Math.toDegrees(atan2(deltaY.toDouble(), deltaX.toDouble())).toFloat()
         return if (rotation < 0) rotation + 360 else rotation
     }
 }
