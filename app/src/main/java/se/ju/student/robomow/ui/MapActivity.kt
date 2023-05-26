@@ -23,7 +23,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 
-class MapActivity : AppCompatActivity(), ZoomableMapView.CollisionAvoidanceListener {
+class MapActivity : AppCompatActivity(), ZoomableMapView.MapViewClickListener {
     @Inject
     lateinit var roboMowApi: RoboMowApi
     private lateinit var mapView: ZoomableMapView

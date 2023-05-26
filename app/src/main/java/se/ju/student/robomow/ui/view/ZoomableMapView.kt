@@ -36,7 +36,7 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
     private val collisionAvoidanceCircleAndAvoidedCollisions =
         mutableListOf<Pair<CollisionAvoidanceCircle, AvoidedCollisions>>()
 
-    var listener: CollisionAvoidanceListener? = null
+    var listener: MapViewClickListener? = null
 
     private val grassTexture: BitmapDrawable =
         AppCompatResources.getDrawable(context, R.drawable.grass_texture) as BitmapDrawable
@@ -70,7 +70,7 @@ class ZoomableMapView(context: Context, attrs: AttributeSet?) : View(context, at
     )
 
 
-    interface CollisionAvoidanceListener {
+    interface MapViewClickListener {
         fun onCollisionAvoidanceClicked(collision: AvoidedCollisions)
         fun onInformationOverviewClicked()
     }
