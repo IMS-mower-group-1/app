@@ -23,10 +23,7 @@ import se.ju.student.robomow.R
 import se.ju.student.robomow.api.RoboMowApi
 import javax.inject.Inject
 
-@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-    @Inject
-    lateinit var roboMowApi: RoboMowApi
     private val bluetoothClient: BluetoothClient?
         get() = BluetoothClientHolder.bluetoothClient
 
