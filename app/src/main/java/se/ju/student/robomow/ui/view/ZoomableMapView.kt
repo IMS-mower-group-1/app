@@ -10,7 +10,7 @@ import android.view.ScaleGestureDetector
 import android.view.View
 import androidx.appcompat.content.res.AppCompatResources
 import se.ju.student.robomow.R
-import se.ju.student.robomow.data.CollisionAvoidanceCircle
+import se.ju.student.robomow.model.CollisionAvoidanceCircle
 import se.ju.student.robomow.model.AvoidedCollisions
 import se.ju.student.robomow.model.Position
 import se.ju.student.robomow.ui.constants.MapConstants

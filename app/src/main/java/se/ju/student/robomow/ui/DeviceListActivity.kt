@@ -13,7 +13,6 @@ import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import android.app.ProgressDialog
 import android.net.Uri
 import android.os.Handler
 import android.os.Looper
@@ -21,13 +20,9 @@ import android.provider.Settings
 import android.view.View
 import android.widget.*
 import androidx.core.app.ActivityCompat
-import androidx.fragment.app.DialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
-import dagger.Provides
 import dagger.hilt.android.AndroidEntryPoint
-import se.ju.student.robomow.BluetoothClient
-import se.ju.student.robomow.BluetoothClientHolder
+import se.ju.student.robomow.data.BluetoothClientHolder
 import se.ju.student.robomow.adapter.BluetoothDeviceListAdapter
 import se.ju.student.robomow.R
 import se.ju.student.robomow.RoboMowApplication
