@@ -1,4 +1,4 @@
-package se.ju.student.robomow.ui
+package se.ju.student.robomow.ui.view
 
 import android.os.Bundle
 import android.view.LayoutInflater

@@ -1,4 +1,4 @@
-package se.ju.student.robomow
+package se.ju.student.robomow.data
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -6,6 +6,7 @@ import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import se.ju.student.robomow.data.BluetoothClient
 
 @HiltAndroidApp
 class RoboMowApplication : Application() {

@@ -1,4 +1,4 @@
-package se.ju.student.robomow
+package se.ju.student.robomow.data
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice

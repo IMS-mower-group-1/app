@@ -17,16 +17,13 @@ import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.Disposable
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import se.ju.student.robomow.BluetoothClient
-import se.ju.student.robomow.BluetoothClientHolder
+import se.ju.student.robomow.data.BluetoothClient
+import se.ju.student.robomow.data.BluetoothClientHolder
 import se.ju.student.robomow.R
 import se.ju.student.robomow.api.RoboMowApi
 import javax.inject.Inject
 
-@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-    @Inject
-    lateinit var roboMowApi: RoboMowApi
     private val bluetoothClient: BluetoothClient?
         get() = BluetoothClientHolder.bluetoothClient
 

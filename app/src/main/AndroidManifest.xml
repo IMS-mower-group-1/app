@@ -26,9 +26,6 @@
             android:name=".ui.MapActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.TestParcelableActivity"
-            android:exported="false" />
-        <activity
             android:name=".ui.MowSessionsActivity"
             android:exported="false" />
         <activity

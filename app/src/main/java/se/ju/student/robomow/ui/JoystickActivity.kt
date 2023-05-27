@@ -1,24 +1,16 @@
 package se.ju.student.robomow.ui
-import android.app.ProgressDialog
-import android.bluetooth.BluetoothDevice
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import se.ju.student.robomow.BluetoothClient
-import se.ju.student.robomow.BluetoothClientHolder
+import se.ju.student.robomow.data.BluetoothClient
+import se.ju.student.robomow.data.BluetoothClientHolder
 import se.ju.student.robomow.R
-import se.ju.student.robomow.RoboMowApplication
 import se.ju.student.robomow.ui.view.JoystickView
-import java.math.BigDecimal
-import java.math.RoundingMode
 import kotlin.math.round
 
 class JoystickActivity : AppCompatActivity(), JoystickView.JoystickListener {
